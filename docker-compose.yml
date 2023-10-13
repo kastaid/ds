@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+  ds:
+    build: .
+    image: ds:latest
+    volumes:
+      - ./:/app
+    env_file:
+      - config.env
+    restart: on-failure
+    network_mode: bridge
