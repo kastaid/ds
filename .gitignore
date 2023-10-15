@@ -133,8 +133,6 @@ dmypy.json
 
 config.env
 logs
-broadcast.txt
-users.txt
 *.db
 *.session*
 alembic*
