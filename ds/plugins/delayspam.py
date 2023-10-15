@@ -218,7 +218,7 @@ async def copy(
     message: Union[Message, str],
     chat_id: int,
     time: Union[int, float],
-):
+) -> None:
     try:
         if isinstance(message, str):
             await User.send_message(

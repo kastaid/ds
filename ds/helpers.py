@@ -9,7 +9,6 @@ import os
 import sys
 from pathlib import Path
 from typing import Union
-import psutil
 from . import PROJECT, Root
 
 
@@ -35,6 +34,8 @@ def get_terminal_logs() -> Path:
 def restart() -> None:
     os.system("clear")
     try:
+        import psutil
+
         proc = psutil.Process(os.getpid())
         for p in proc.open_files() + proc.connections():
             os.close(p.fd)
