@@ -6,7 +6,6 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from os import getenv
-from threading import local
 import dotenv
 from . import WORKERS
 
@@ -35,9 +34,4 @@ class Var:
     HANDLER: str = getenv("HANDLER", "").strip()
 
 
-class Shared(local):
-    pass
-
-
-shared = Shared()
 del dotenv, WORKERS

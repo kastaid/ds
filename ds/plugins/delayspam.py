@@ -6,19 +6,19 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from asyncio import sleep
-from typing import Union
+from typing import Set, Union
 from pyrogram import filters
 from pyrogram.enums.parse_mode import ParseMode
 from pyrogram.errors import FloodWait
 from pyrogram.types import Message
 from ..bot import User
-from ..config import Var, shared
+from ..config import Var
 
-shared.DS_TASK = DS_TASK = set()
-shared.DS1_TASK = DS1_TASK = set()
-shared.DS2_TASK = DS2_TASK = set()
-shared.DS3_TASK = DS3_TASK = set()
-shared.DS4_TASK = DS4_TASK = set()
+DS_TASK: Set[int] = set()
+DS1_TASK: Set[int] = set()
+DS2_TASK: Set[int] = set()
+DS3_TASK: Set[int] = set()
+DS4_TASK: Set[int] = set()
 
 
 @User.on_message(
