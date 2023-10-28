@@ -6,7 +6,6 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 import os
-import platform
 import subprocess
 import sys
 from asyncio import sleep
@@ -17,12 +16,7 @@ from pyrogram.client import Client as RawClient
 from pyrogram.enums.parse_mode import ParseMode
 from pyrogram.errors import FloodWait, NotAcceptable, Unauthorized
 from pyrogram.types import User
-from . import (
-    __version__,
-    PROJECT,
-    StartTime,
-    Root,
-)
+from . import PROJECT, StartTime, Root
 from .config import Var
 from .helpers import time_formatter, restart
 from .logger import LOGS
@@ -84,13 +78,10 @@ User = Client(
     name=PROJECT,
     api_id=Var.API_ID,
     api_hash=Var.API_HASH,
-    app_version=__version__,
-    device_model=PROJECT + "v" + __version__,
     session_string=Var.STRING_SESSION,
     workers=Var.WORKERS,
     workdir=Root,
     parse_mode=ParseMode.HTML,
-    system_version=platform.version() + " " + platform.machine(),
     sleep_threshold=30,
     plugins={
         "root": PROJECT + ".plugins",
