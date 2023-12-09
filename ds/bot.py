@@ -25,7 +25,7 @@ from .logger import LOGS
 class Client(RawClient):
     def __init__(self, **kwargs: Any):
         self._me: User | None = None
-        self._is_bot: bool = bool(kwargs.get("bot_token", None))
+        self._is_bot: bool = bool(kwargs.get("bot_token"))
         self.logs = LOGS
         super().__init__(**kwargs)
 
