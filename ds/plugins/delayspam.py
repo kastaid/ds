@@ -9,7 +9,7 @@ from asyncio import sleep
 from typing import Set, Union
 from pyrogram import filters
 from pyrogram.enums.parse_mode import ParseMode
-from pyrogram.errors import FloodWait
+from pyrogram.errors import FloodWait, SlowmodeWait
 from pyrogram.types import Message
 from ..bot import User
 from ..config import Var
@@ -239,6 +239,8 @@ async def copy(
     except FloodWait as fw:
         await sleep(fw.value)
         await copy(message, chat_id, time)
+    except SlowmodeWait:
+        pass
     except BaseException:
         raise
 

@@ -26,8 +26,6 @@ if __name__ == "__main__":
     try:
         LOOP.run_until_complete(main())
     except (
-        KeyboardInterrupt,
-        SystemExit,
         ConnectionError,
         TimeoutError,
         asyncio.exceptions.CancelledError,
