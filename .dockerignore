@@ -16,3 +16,5 @@ requirements-dev.txt
 run.py
 scripts
 setup.cfg
+manifest.json
+version.py

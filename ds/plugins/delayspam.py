@@ -6,198 +6,101 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from asyncio import sleep
-from typing import Set, Union
+from typing import Dict, Set, Union
 from pyrogram import filters
-from pyrogram.enums.parse_mode import ParseMode
-from pyrogram.errors import FloodWait, SlowmodeWait
+from pyrogram.enums import ParseMode
+from pyrogram.errors import RPCError, SlowmodeWait
 from pyrogram.types import Message
-from ..bot import User
-from ..config import Var
+from ds.config import Var
+from ds.user import UserClient
 
-DS_TASK: Set[int] = set()
-DS1_TASK: Set[int] = set()
-DS2_TASK: Set[int] = set()
-DS3_TASK: Set[int] = set()
-DS4_TASK: Set[int] = set()
+DS_TASKS: Dict[int, Set[int]] = {i: set() for i in range(10)}
 
 
-@User.on_message(
+def get_task(ds: str) -> Set[int]:
+    return DS_TASKS.get(int(ds or 0))
+
+
+@UserClient.on_message(
     filters.command(
-        [
-            "ds",
-            "ds1",
-            "ds2",
-            "ds3",
-            "ds4",
-        ],
+        [f"ds{i}" if i != 0 else "ds" for i in range(10)],
         prefixes=Var.HANDLER,
     )
     & filters.me
     & ~filters.forwarded
 )
-async def ds_(client: User, m: Message):
+async def ds_(c, m):
+    """
+    Start ds, ds1 - ds9
+    Usage: ds [delay] [count] [text/reply]
+    """
     chat_id = m.chat.id
     ds = m.command[0].lower()[2:3]
-    text = "Please wait until previous •ds{}• finished or cancel it."
-    if ds == "1":
-        if chat_id in DS1_TASK:
-            return await eor(m, text.format(ds), time=2)
-    elif ds == "2":
-        if chat_id in DS2_TASK:
-            return await eor(m, text.format(ds), time=2)
-    elif ds == "3":
-        if chat_id in DS3_TASK:
-            return await eor(m, text.format(ds), time=2)
-    elif ds == "4":
-        if chat_id in DS4_TASK:
-            return await eor(m, text.format(ds), time=2)
-    else:
-        if chat_id in DS_TASK:
-            return await eor(m, text.format(ds), time=2)
-    if m.reply_to_message_id:
+    task = get_task(ds)
+    if chat_id in task:
+        return await eor(c, m, f"Please wait until previous •ds{ds}• is finished or cancel it.", time=2)
+    message = m.reply_to_message if m.reply_to_message_id else " ".join(m.text.markdown.split(" ")[3:])
+    await c.try_delete(m)
+    try:
+        args = m.command[1:]
+        delay, count = int(args[0]), int(args[1])
+    except BaseException:
+        return await eor(c, m, f"`{Var.HANDLER}ds{ds} [delay] [count] [text/reply]`", time=4)
+    delay = 2 if int(delay) < 2 else delay
+    task.add(chat_id)
+    for _ in range(count):
+        if chat_id not in get_task(ds):
+            break
         try:
-            args = m.command[1:]
-            delay = float(args[0])
-            count = int(args[1])
-            message = m.reply_to_message
-            await try_delete(m)
-        except BaseException:
-            return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [reply]`", time=4)
-    else:
-        try:
-            await try_delete(m)
-            args = m.command[1:]
-            delay = float(args[0])
-            count = int(args[1])
-            message = (
-                m.text.markdown.replace(f"{Var.HANDLER}ds{ds}", "").replace(args[0], "").replace(args[1], "").strip()
-            )
-        except BaseException:
-            return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [text]`", time=4)
-    delay = 2 if delay and int(delay) < 2 else delay
-    if ds == "1":
-        DS1_TASK.add(chat_id)
-        for _ in range(count):
-            if chat_id not in DS1_TASK:
-                break
-            try:
-                await copy(message, chat_id, delay)
-            except BaseException:
-                break
-        DS1_TASK.discard(chat_id)
-    elif ds == "2":
-        DS2_TASK.add(chat_id)
-        for _ in range(count):
-            if chat_id not in DS2_TASK:
-                break
-            try:
-                await copy(message, chat_id, delay)
-            except BaseException:
-                break
-        DS2_TASK.discard(chat_id)
-    elif ds == "3":
-        DS3_TASK.add(chat_id)
-        for _ in range(count):
-            if chat_id not in DS3_TASK:
-                break
-            try:
-                await copy(message, chat_id, delay)
-            except BaseException:
-                break
-        DS3_TASK.discard(chat_id)
-    elif ds == "4":
-        DS4_TASK.add(chat_id)
-        for _ in range(count):
-            if chat_id not in DS4_TASK:
-                break
-            try:
-                await copy(message, chat_id, delay)
-            except BaseException:
-                break
-        DS4_TASK.discard(chat_id)
-    else:
-        DS_TASK.add(chat_id)
-        for _ in range(count):
-            if chat_id not in DS_TASK:
-                break
-            try:
-                await copy(message, chat_id, delay)
-            except BaseException:
-                break
-        DS_TASK.discard(chat_id)
+            await copy(c, message, chat_id, delay)
+        except SlowmodeWait:
+            pass
+        except RPCError:
+            break
+    get_task(ds).discard(chat_id)
 
 
-@User.on_message(
+@UserClient.on_message(
     filters.command(
-        [
-            "dscancel",
-            "ds1cancel",
-            "ds2cancel",
-            "ds3cancel",
-            "ds4cancel",
-        ],
+        [f"ds{i}cancel" if i != 0 else "dscancel" for i in range(10)],
         prefixes=Var.HANDLER,
     )
     & filters.me
     & ~filters.forwarded
 )
-async def dscancel_(_, m: Message):
+async def dscancel_(c, m):
+    """
+    Cancel ds - ds9 in current chat
+    Usage: dscancel, ds1cancel
+    """
     chat_id = m.chat.id
     ds = m.command[0].lower()[2:3].replace("c", "")
-    text = "No current •ds{}• are running."
-    if ds == "1":
-        if chat_id not in DS1_TASK:
-            return await eor(m, text.format(ds), time=2)
-        DS1_TASK.discard(chat_id)
-    elif ds == "2":
-        if chat_id not in DS2_TASK:
-            return await eor(m, text.format(ds), time=2)
-        DS2_TASK.discard(chat_id)
-    elif ds == "3":
-        if chat_id not in DS3_TASK:
-            return await eor(m, text.format(ds), time=2)
-        DS3_TASK.discard(chat_id)
-    elif ds == "4":
-        if chat_id not in DS3_TASK:
-            return await eor(m, text.format(ds), time=2)
-        DS4_TASK.discard(chat_id)
-    else:
-        if chat_id not in DS_TASK:
-            return await eor(m, text.format(ds), time=2)
-        DS_TASK.discard(chat_id)
-    await eor(m, f"`ds{ds} cancelled`", time=2)
+    task = get_task(ds)
+    if chat_id not in task:
+        return await eor(c, m, f"No running •ds{ds}• in current chat.", time=2)
+    task.discard(chat_id)
+    await eor(c, m, f"`cancelled ds{ds} in current chat`", time=2)
 
 
-@User.on_message(
+@UserClient.on_message(
     filters.command(
-        [
-            "dsstop",
-            "ds1stop",
-            "ds2stop",
-            "ds3stop",
-            "ds4stop",
-        ],
+        [f"ds{i}stop" if i != 0 else "dsstop" for i in range(10)],
         prefixes=Var.HANDLER,
     )
     & filters.me
     & ~filters.forwarded
 )
-async def dsstop_(_, m: Message):
+async def dsstop_(c, m):
+    """
+    Stop ds - ds9 in all chats
+    usage: dsstop, ds1stop
+    """
     ds = m.command[0].lower()[2:3].replace("s", "")
-    if ds == "1":
-        DS1_TASK.clear()
-    elif ds == "2":
-        DS2_TASK.clear()
-    elif ds == "3":
-        DS3_TASK.clear()
-    elif ds == "4":
-        DS4_TASK.clear()
-    else:
-        DS_TASK.clear()
-    await eor(m, f"`stopped all ds{ds}`", time=4)
+    get_task(ds).clear()
+    await eor(c, m, f"`stopped ds{ds} in all chats`", time=4)
 
 
-@User.on_message(
+@UserClient.on_message(
     filters.command(
         "dsclear",
         prefixes=Var.HANDLER,
@@ -205,47 +108,42 @@ async def dsstop_(_, m: Message):
     & filters.me
     & ~filters.forwarded
 )
-async def dsclear_(_, m: Message):
-    DS_TASK.clear()
-    DS1_TASK.clear()
-    DS2_TASK.clear()
-    DS3_TASK.clear()
-    DS4_TASK.clear()
-    await eor(m, "`clear all ds*`", time=4)
+async def dsclear_(c, m):
+    """
+    Clear and stop all ds
+    usage: dsclear
+    """
+    for task in DS_TASKS.values():
+        task.clear()
+    await eor(c, m, "`clear all ds*`", time=4)
 
 
 async def copy(
-    message: Union[Message, str],
+    client,
+    message: Union[str, Message],
     chat_id: int,
     time: Union[int, float],
 ) -> None:
-    try:
-        if isinstance(message, str):
-            await User.send_message(
-                chat_id,
-                message,
-                parse_mode=ParseMode.DEFAULT,
-                disable_web_page_preview=True,
-                disable_notification=True,
-            )
-        else:
-            await message.copy(
-                chat_id,
-                parse_mode=ParseMode.DEFAULT,
-                disable_notification=True,
-                reply_to_message_id=None,
-            )
-        await sleep(time)
-    except FloodWait as fw:
-        await sleep(fw.value)
-        await copy(message, chat_id, time)
-    except SlowmodeWait:
-        pass
-    except BaseException:
-        raise
+    if isinstance(message, str):
+        await client.send_message(
+            chat_id,
+            message,
+            parse_mode=ParseMode.DEFAULT,
+            disable_web_page_preview=True,
+            disable_notification=True,
+        )
+    else:
+        await message.copy(
+            chat_id,
+            parse_mode=ParseMode.DEFAULT,
+            disable_notification=True,
+            reply_to_message_id=None,
+        )
+    await sleep(time)
 
 
 async def eor(
+    client,
     message: Message,
     text: str,
     time: Union[int, float],
@@ -268,15 +166,5 @@ async def eor(
         )
         if not time:
             return msg
-    try:
-        await sleep(time)
-        return await msg.delete()
-    except BaseException:
-        return False
-
-
-async def try_delete(message: Message) -> bool:
-    try:
-        return await message.delete()
-    except BaseException:
-        return False
+    await sleep(time)
+    return await client.try_delete(msg)
