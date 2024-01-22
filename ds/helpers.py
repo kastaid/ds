@@ -7,9 +7,8 @@
 
 import os
 import sys
-from pathlib import Path
-from typing import Union
-from . import PROJECT, Root
+from typing import Union, List
+from ds import PROJECT, Root
 
 
 def time_formatter(ms: Union[int, float]) -> str:
@@ -17,18 +16,18 @@ def time_formatter(ms: Union[int, float]) -> str:
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
     weeks, days = divmod(days, 7)
-    tmp = (
-        ((str(weeks) + "w, ") if weeks else "")
-        + ((str(days) + "d, ") if days else "")
-        + ((str(hours) + "h, ") if hours else "")
-        + ((str(minutes) + "m, ") if minutes else "")
-        + ((str(seconds) + "s, ") if seconds else "")
+    time_units = (
+        f"{weeks}w, " if weeks else "",
+        f"{days}d, " if days else "",
+        f"{hours}h, " if hours else "",
+        f"{minutes}m, " if minutes else "",
+        f"{seconds}s, " if seconds else "",
     )
-    return tmp and tmp[:-2] or "0s"
+    return "".join(time_units)[:-2] or "0s"
 
 
-def get_terminal_logs() -> Path:
-    return sorted((Root / "logs").rglob("*.log"))
+def get_terminal_logs() -> List[str]:
+    return sorted(map(str, (Root / "logs").rglob("*.log")))
 
 
 def restart() -> None:
@@ -42,7 +41,5 @@ def restart() -> None:
     except BaseException:
         pass
     reqs = Root / "requirements.txt"
-    os.system(
-        f"{sys.executable} -m pip install --disable-pip-version-check --default-timeout=100 --no-cache-dir -U -r {reqs}"
-    )
+    os.system(f"{sys.executable} -m pip install --disable-pip-version-check --default-timeout=100 -U -r {reqs}")
     os.execl(sys.executable, sys.executable, "-m", PROJECT)

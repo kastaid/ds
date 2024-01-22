@@ -6,10 +6,10 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from os import getenv
-import dotenv
-from . import WORKERS
+from dotenv import load_dotenv, find_dotenv
+from ds import WORKERS
 
-dotenv.load_dotenv(dotenv.find_dotenv("config.env"))
+load_dotenv(find_dotenv("config.env"))
 
 
 def tobool(val: str) -> int:
@@ -34,4 +34,4 @@ class Var:
     HANDLER: str = getenv("HANDLER", "").strip()
 
 
-del dotenv, WORKERS
+del load_dotenv, find_dotenv, WORKERS

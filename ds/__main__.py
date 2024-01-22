@@ -5,39 +5,33 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
-import asyncio
 import sys
-from pyrogram.raw.functions.account import DeleteAccount
+import uvloop
 from pyrogram.sync import idle
-from . import LOOP
-from .bot import User
-from .logger import LOGS
-
-DeleteAccount.__new__ = None
+from ds.logger import LOG
+from ds.patcher import *  # noqa
+from ds.user import UserClient
 
 
 async def main() -> None:
-    await User.start()
+    await UserClient().start()
     await idle()
-    await User.stop()
+    await UserClient().stop()
 
 
 if __name__ == "__main__":
     try:
-        LOOP.run_until_complete(main())
+        uvloop.run(main())
     except (
-        ConnectionError,
-        TimeoutError,
-        asyncio.exceptions.CancelledError,
+        KeyboardInterrupt,
+        SystemExit,
     ):
         pass
-    except RuntimeError as err:
-        LOGS.warning(f"[MAIN_WARNING] : {err}")
     except ImportError as err:
-        LOGS.exception(f"[MAIN_MODULE_IMPORT] : {err}")
+        LOG.exception(f"[MAIN_MODULE_IMPORT] : {err}")
         sys.exit(1)
     except Exception as err:
-        LOGS.exception(f"[MAIN_ERROR] : {err}")
+        LOG.exception(f"[MAIN_ERROR] : {err}")
     finally:
-        LOGS.warning("[MAIN] - Stopped...")
+        LOG.warning("[MAIN] - Stopped...")
         sys.exit(0)
