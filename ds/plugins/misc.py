@@ -10,6 +10,7 @@ from time import time, monotonic
 from pyrogram import filters
 from pyrogram.errors import RPCError
 from pyrogram.raw.functions import Ping
+from pyrogram.raw.functions.messages import ReadMentions, ReadReactions
 from ds import StartTime
 from ds.config import Var
 from ds.helpers import time_formatter, get_terminal_logs, restart
@@ -131,6 +132,27 @@ async def purge_(c, m):
     if len(chunk) > 0:
         try:
             await c.delete_messages(chat_id, chunk)
+        except RPCError:
+            pass
+    await c.try_delete(m)
+
+
+@UserClient.on_message(
+    filters.command(
+        "read",
+        prefixes=Var.HANDLER,
+    )
+    & filters.me
+    & ~filters.forwarded
+)
+async def read_(c, m):
+    try:
+        peer = await c.resolve_peer(m.chat.id)
+    except RPCError:
+        return
+    for request in [ReadMentions(peer=peer), ReadReactions(peer=peer)]:
+        try:
+            await c.invoke(request)
         except RPCError:
             pass
     await c.try_delete(m)
