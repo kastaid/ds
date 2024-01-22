@@ -150,9 +150,13 @@ async def read_(c, m):
         peer = await c.resolve_peer(m.chat.id)
     except RPCError:
         return
-    for request in [ReadMentions(peer=peer), ReadReactions(peer=peer)]:
-        try:
-            await c.invoke(request)
-        except RPCError:
-            pass
+    try:
+        await c.invoke(ReadMentions(peer=peer))
+        await sleep(1)
+    except RPCError:
+        pass
+    try:
+        await c.invoke(ReadReactions(peer=peer))
+    except RPCError:
+        pass
     await c.try_delete(m)
