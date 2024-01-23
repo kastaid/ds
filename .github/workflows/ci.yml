@@ -39,5 +39,5 @@ jobs:
           commit_message: "[action] ci: auto-fixes"
           commit_options: "--no-verify"
           commit_user_name: kastaid
-          commit_user_email: illvart@protonmail.com
-          commit_author: kastaid <illvart@protonmail.com>
+          commit_user_email: ${{ secrets.EMAIL }}
+          commit_author: kastaid <${{ secrets.EMAIL }}>
