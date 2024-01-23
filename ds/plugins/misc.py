@@ -5,7 +5,7 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
-from asyncio import sleep
+from asyncio import sleep, gather
 from time import time, monotonic
 from pyrogram import filters
 from pyrogram.errors import RPCError
@@ -146,17 +146,22 @@ async def purge_(c, m):
     & ~filters.forwarded
 )
 async def read_(c, m):
+    chat_id = m.chat.id
     try:
-        peer = await c.resolve_peer(m.chat.id)
+        peer = await c.resolve_peer(chat_id)
     except RPCError:
         return
+    await gather(
+        *[
+            c.invoke(i)
+            for i in (
+                ReadMentions(peer=peer),
+                ReadReactions(peer=peer),
+            )
+        ],
+    )
     try:
-        await c.invoke(ReadMentions(peer=peer))
-        await sleep(1)
-    except RPCError:
-        pass
-    try:
-        await c.invoke(ReadReactions(peer=peer))
+        await c.read_chat_history(chat_id)
     except RPCError:
         pass
     await c.try_delete(m)
