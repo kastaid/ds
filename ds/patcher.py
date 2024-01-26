@@ -1,14 +1,22 @@
+# ds < https://t.me/kastaid >
+# Copyright (C) 2023-present kastaid
+#
+# This file is a part of < https://github.com/kastaid/ds/ >
+# Please read the MIT License in
+# < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
+
 from asyncio import sleep
+from typing import Any, Tuple, Callable
 import pyrogram
-from pyrogram.errors.exceptions.flood_420 import FloodWait
+from pyrogram.errors import FloodWait, PeerIdInvalid, UserIsBlocked
 from ds.logger import LOG
 
 
-def patch(obj):
-    def is_patchable(item):
+def patch(obj: Any):
+    def is_patchable(item: Tuple[str, Any]) -> bool:
         return getattr(item[1], "patchable", False)
 
-    def wrapper(container):
+    def wrapper(container: Callable) -> Callable:
         for name, func in filter(is_patchable, container.__dict__.items()):
             setattr(obj, f"old_{name}", getattr(obj, name, None))
             setattr(obj, name, func)
@@ -17,7 +25,7 @@ def patch(obj):
     return wrapper
 
 
-def patchable(func):
+def patchable(func: Callable) -> Callable:
     func.patchable = True
     return func
 
@@ -32,6 +40,8 @@ class Client:
             LOG.warning(fw)
             await sleep(fw.value)
             return await self.invoke(*args, **kwargs)
+        except UserIsBlocked:
+            pass
 
     @patchable
     async def resolve_peer(self, *args, **kwargs):
@@ -41,6 +51,8 @@ class Client:
             LOG.warning(fw)
             await sleep(fw.value)
             return await self.resolve_peer(*args, **kwargs)
+        except PeerIdInvalid:
+            pass
 
     @patchable
     async def save_file(self, *args, **kwargs):
