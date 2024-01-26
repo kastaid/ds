@@ -8,7 +8,12 @@
 from asyncio import sleep
 from typing import Any, Tuple, Callable
 import pyrogram
-from pyrogram.errors import FloodWait, PeerIdInvalid, UserIsBlocked
+from pyrogram.errors import (
+    FloodWait,
+    PeerIdInvalid,
+    UserIsBlocked,
+    PersistentTimestampInvalid,
+)
 from ds.logger import LOG
 
 
@@ -40,7 +45,10 @@ class Client:
             LOG.warning(fw)
             await sleep(fw.value)
             return await self.invoke(*args, **kwargs)
-        except UserIsBlocked:
+        except (
+            UserIsBlocked,
+            PersistentTimestampInvalid,
+        ):
             pass
 
     @patchable
