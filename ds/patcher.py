@@ -5,68 +5,99 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
+import logging
 from asyncio import sleep
-from typing import Any, Tuple, Callable
-import pyrogram
-from pyrogram.errors import (
-    FloodWait,
-    PeerIdInvalid,
-    UserIsBlocked,
-    PersistentTimestampInvalid,
+from functools import wraps
+from typing import (
+    Any,
+    Tuple,
+    Callable,
+    T,
+    Type,
 )
+import pyrogram.client
+import pyrogram.errors
+import pyrogram.types.messages_and_media.message
 from ds.logger import LOG
 
 
-def patch(obj: Any):
+def patch(target: Any):
     def is_patchable(item: Tuple[str, Any]) -> bool:
         return getattr(item[1], "patchable", False)
 
-    def wrapper(container: Callable) -> Callable:
+    @wraps(target)
+    def wrapper(container: Type[T]) -> T:
         for name, func in filter(is_patchable, container.__dict__.items()):
-            setattr(obj, f"old_{name}", getattr(obj, name, None))
-            setattr(obj, name, func)
+            old = getattr(target, name, None)
+            if old is not None:
+                setattr(target, f"old_{name}", old)
+            if getattr(func, "is_property", False):
+                func = property(func)
+            setattr(target, name, func)
         return container
 
     return wrapper
 
 
-def patchable(func: Callable) -> Callable:
-    func.patchable = True
-    return func
+def patchable(is_property: bool = False) -> Callable:
+    def wrapper(func: Callable) -> Callable:
+        func.patchable = True
+        func.is_property = is_property
+        return func
+
+    return wrapper
 
 
 @patch(pyrogram.client.Client)
 class Client:
-    @patchable
+    @patchable(True)
+    def log(self) -> logging:
+        return LOG
+
+    @patchable()
     async def invoke(self, *args, **kwargs):
         try:
             return await self.old_invoke(*args, **kwargs)
-        except FloodWait as fw:
-            LOG.warning(fw)
+        except pyrogram.errors.FloodWait as fw:
+            self.log.warning(fw)
             await sleep(fw.value)
             return await self.invoke(*args, **kwargs)
         except (
-            UserIsBlocked,
-            PersistentTimestampInvalid,
+            pyrogram.errors.UserIsBlocked,
+            pyrogram.errors.PersistentTimestampInvalid,
         ):
             pass
 
-    @patchable
+    @patchable()
     async def resolve_peer(self, *args, **kwargs):
         try:
             return await self.old_resolve_peer(*args, **kwargs)
-        except FloodWait as fw:
-            LOG.warning(fw)
+        except pyrogram.errors.FloodWait as fw:
+            self.log.warning(fw)
             await sleep(fw.value)
             return await self.resolve_peer(*args, **kwargs)
-        except PeerIdInvalid:
+        except pyrogram.errors.PeerIdInvalid:
             pass
 
-    @patchable
+    @patchable()
     async def save_file(self, *args, **kwargs):
         try:
             return await self.old_save_file(*args, **kwargs)
-        except FloodWait as fw:
-            LOG.warning(fw)
+        except pyrogram.errors.FloodWait as fw:
+            self.log.warning(fw)
             await sleep(fw.value)
             return await self.save_file(*args, **kwargs)
+
+
+@patch(pyrogram.types.messages_and_media.message.Message)
+class Message:
+    @patchable(True)
+    def client(self) -> Client:
+        return self._client
+
+    @patchable()
+    async def delete(self, revoke: bool = True) -> bool:
+        try:
+            return await self.old_delete(revoke=revoke)
+        except BaseException:
+            return False

@@ -25,7 +25,11 @@ from ds.user import UserClient
     & filters.me
     & ~filters.forwarded
 )
-async def ping_(c, m):
+async def _ping(c, m):
+    """
+    Ping Telegram server
+    Usage: ping
+    """
     start = monotonic()
     try:
         await c.invoke(Ping(ping_id=0))
@@ -49,7 +53,11 @@ async def ping_(c, m):
     & filters.me
     & ~filters.forwarded
 )
-async def restart_(_, m):
+async def _restart(_, m):
+    """
+    Restart userbot
+    Usage: restart
+    """
     await m.edit("Restarting Userbot...")
     restart()
 
@@ -62,7 +70,11 @@ async def restart_(_, m):
     & filters.me
     & ~filters.forwarded
 )
-async def logs_(c, m):
+async def _logs(_, m):
+    """
+    Get the logs
+    Usage: logs
+    """
     msg = await m.edit("Getting logs...")
     for count, file in enumerate(get_terminal_logs(), start=1):
         await m.reply_document(
@@ -71,7 +83,7 @@ async def logs_(c, m):
             quote=False,
         )
         await sleep(1)
-    await c.try_delete(msg)
+    await msg.delete()
 
 
 @UserClient.on_message(
@@ -82,7 +94,11 @@ async def logs_(c, m):
     & filters.me
     & ~filters.forwarded
 )
-async def id_(_, m):
+async def _id(_, m):
+    """
+    Get user id
+    Usage: id
+    """
     who = m.reply_to_message.from_user.id if m.reply_to_message_id else m.chat.id
     await m.edit(f"<code>{who}</code>")
 
@@ -95,10 +111,14 @@ async def id_(_, m):
     & filters.me
     & ~filters.forwarded
 )
-async def del_(c, m):
-    await c.try_delete(m)
+async def _del(_, m):
+    """
+    Delete message
+    Usage: del
+    """
+    await m.delete()
     if m.reply_to_message_id:
-        await c.try_delete(m.reply_to_message)
+        await m.reply_to_message.delete()
 
 
 @UserClient.on_message(
@@ -110,7 +130,11 @@ async def del_(c, m):
     & filters.reply
     & ~filters.forwarded
 )
-async def purge_(c, m):
+async def _purge(c, m):
+    """
+    Purge urself by reply
+    Usage: purge
+    """
     chunk = []
     chat_id, reply_id = m.chat.id, m.reply_to_message.id
     async for msg in c.get_chat_history(
@@ -134,7 +158,7 @@ async def purge_(c, m):
             await c.delete_messages(chat_id, chunk)
         except RPCError:
             pass
-    await c.try_delete(m)
+    await m.delete()
 
 
 @UserClient.on_message(
@@ -145,7 +169,11 @@ async def purge_(c, m):
     & filters.me
     & ~filters.forwarded
 )
-async def read_(c, m):
+async def _read(c, m):
+    """
+    Read chat current chat also mentions and reactions
+    Usage: read
+    """
     chat_id = m.chat.id
     try:
         peer = await c.resolve_peer(chat_id)
@@ -164,4 +192,4 @@ async def read_(c, m):
         await c.read_chat_history(chat_id)
     except RPCError:
         pass
-    await c.try_delete(m)
+    await m.delete()
