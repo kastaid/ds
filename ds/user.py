@@ -22,7 +22,7 @@ class UserClient(Client):
     def __init__(self):
         self._me: User | None = None
         super().__init__(
-            name=PROJECT,
+            PROJECT,
             api_id=Var.API_ID,
             api_hash=Var.API_HASH,
             session_string=Var.STRING_SESSION,
@@ -75,14 +75,12 @@ class UserClient(Client):
     async def try_delete(self, event) -> bool:
         if not event:
             return False
-        is_cb = isinstance(event, CallbackQuery)
-        message = is_cb and event.message or event
-        try:
-            return await message.delete()
-        except BaseException:
-            if is_cb:
-                await self.answer(event)
-        return False
+        is_callback = isinstance(event, CallbackQuery)
+        message = event.message if is_callback else event
+        deleted = await message.delete()
+        if not deleted and is_callback:
+            await self.answer(event)
+        return deleted
 
     async def stop(self, **_) -> None:
         try:

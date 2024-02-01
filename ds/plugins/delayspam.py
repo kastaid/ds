@@ -29,7 +29,7 @@ def get_task(ds: str) -> Set[int]:
     & filters.me
     & ~filters.forwarded
 )
-async def ds_(c, m):
+async def _ds(_, m):
     """
     Start ds, ds1 - ds9
     Usage: ds [delay] [count] [text/reply]
@@ -38,21 +38,21 @@ async def ds_(c, m):
     ds = m.command[0].lower()[2:3]
     task = get_task(ds)
     if chat_id in task:
-        return await eor(c, m, f"Please wait until previous •ds{ds}• is finished or cancel it.", time=2)
+        return await eor(m, f"Please wait until previous •ds{ds}• is finished or cancel it.", time=2)
     message = m.reply_to_message if m.reply_to_message_id else " ".join(m.text.markdown.split(" ")[3:])
-    await c.try_delete(m)
+    await m.delete()
     try:
         args = m.command[1:]
         delay, count = int(args[0]), int(args[1])
     except BaseException:
-        return await eor(c, m, f"`{Var.HANDLER}ds{ds} [delay] [count] [text/reply]`", time=4)
+        return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [text/reply]`", time=4)
     delay = 2 if int(delay) < 2 else delay
     task.add(chat_id)
     for _ in range(count):
         if chat_id not in get_task(ds):
             break
         try:
-            await copy(c, message, chat_id, delay)
+            await copy(message, chat_id, delay)
         except SlowmodeWait:
             pass
         except RPCError:
@@ -68,7 +68,7 @@ async def ds_(c, m):
     & filters.me
     & ~filters.forwarded
 )
-async def dscancel_(c, m):
+async def _dscancel(_, m):
     """
     Cancel ds - ds9 in current chat
     Usage: dscancel, ds1cancel
@@ -77,9 +77,9 @@ async def dscancel_(c, m):
     ds = m.command[0].lower()[2:3].replace("c", "")
     task = get_task(ds)
     if chat_id not in task:
-        return await eor(c, m, f"No running •ds{ds}• in current chat.", time=2)
+        return await eor(m, f"No running •ds{ds}• in current chat.", time=2)
     task.discard(chat_id)
-    await eor(c, m, f"`cancelled ds{ds} in current chat`", time=2)
+    await eor(m, f"`cancelled ds{ds} in current chat`", time=2)
 
 
 @UserClient.on_message(
@@ -90,14 +90,14 @@ async def dscancel_(c, m):
     & filters.me
     & ~filters.forwarded
 )
-async def dsstop_(c, m):
+async def _dsstop(_, m):
     """
     Stop ds - ds9 in all chats
     usage: dsstop, ds1stop
     """
     ds = m.command[0].lower()[2:3].replace("s", "")
     get_task(ds).clear()
-    await eor(c, m, f"`stopped ds{ds} in all chats`", time=4)
+    await eor(m, f"`stopped ds{ds} in all chats`", time=4)
 
 
 @UserClient.on_message(
@@ -108,24 +108,23 @@ async def dsstop_(c, m):
     & filters.me
     & ~filters.forwarded
 )
-async def dsclear_(c, m):
+async def _dsclear(_, m):
     """
     Clear and stop all ds
     usage: dsclear
     """
     for task in DS_TASKS.values():
         task.clear()
-    await eor(c, m, "`clear all ds*`", time=4)
+    await eor(m, "`clear all ds*`", time=4)
 
 
 async def copy(
-    client,
     message: Union[str, Message],
     chat_id: int,
     time: Union[int, float],
 ) -> None:
     if isinstance(message, str):
-        await client.send_message(
+        await message.client.send_message(
             chat_id,
             message,
             parse_mode=ParseMode.DEFAULT,
@@ -143,7 +142,6 @@ async def copy(
 
 
 async def eor(
-    client,
     message: Message,
     text: str,
     time: Union[int, float],
@@ -167,4 +165,4 @@ async def eor(
         if not time:
             return msg
     await sleep(time)
-    return await client.try_delete(msg)
+    return await msg.delete()

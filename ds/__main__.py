@@ -25,7 +25,6 @@ if __name__ == "__main__":
     except (
         KeyboardInterrupt,
         SystemExit,
-        TimeoutError,
     ):
         pass
     except ImportError as err:
