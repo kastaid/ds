@@ -15,7 +15,6 @@ from pyrogram.types import User, CallbackQuery
 from ds import PROJECT, StartTime, Root
 from ds.config import Var
 from ds.helpers import time_formatter
-from ds.logger import LOG
 
 
 class UserClient(Client):
@@ -36,7 +35,6 @@ class UserClient(Client):
             },
             sleep_threshold=30,
         )
-        self.log = LOG
 
     async def get_me(
         self,
