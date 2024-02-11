@@ -10,6 +10,7 @@ import shlex
 import sys
 from pathlib import Path
 from subprocess import run
+from version import __version__
 
 RST = "\x1b[0m"
 BOLD = "\x1b[1m"
@@ -106,7 +107,7 @@ parser.add_argument(
     "--version",
     help="show this program version",
     action="version",
-    version="0.0.1",
+    version=__version__,
 )
 parser.add_argument(
     "-h",
