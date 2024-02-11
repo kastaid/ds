@@ -7,17 +7,17 @@
 
 import signal
 import sys
-from os import kill, getpid
+from os import getpid, kill
 from subprocess import CalledProcessError, Popen, check_call
 from time import sleep
 from . import (
-    Root,
-    EXTS,
-    WAIT_FOR,
-    RST,
     BOLD,
+    EXTS,
     RED,
+    RST,
+    WAIT_FOR,
     YELLOW,
+    Root,
 )
 
 try:
@@ -81,4 +81,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    SystemExit(main())
+    raise SystemExit(main())

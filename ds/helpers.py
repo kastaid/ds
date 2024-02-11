@@ -7,11 +7,10 @@
 
 import os
 import sys
-from typing import Union, List
-from ds import PROJECT, Root
+from . import PROJECT, Root
 
 
-def time_formatter(ms: Union[int, float]) -> str:
+def time_formatter(ms: int | float) -> str:
     minutes, seconds = divmod(int(ms / 1000), 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
@@ -26,7 +25,7 @@ def time_formatter(ms: Union[int, float]) -> str:
     return "".join(time_units)[:-2] or "0s"
 
 
-def get_terminal_logs() -> List[str]:
+def get_terminal_logs() -> list[str]:
     return sorted(map(str, (Root / "logs").rglob("*.log")))
 
 

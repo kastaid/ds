@@ -6,7 +6,6 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from asyncio import sleep
-from typing import Dict, Set, Union
 from pyrogram import filters
 from pyrogram.enums import ParseMode
 from pyrogram.errors import RPCError, SlowmodeWait
@@ -14,10 +13,10 @@ from pyrogram.types import Message
 from ds.config import Var
 from ds.user import UserClient
 
-DS_TASKS: Dict[int, Set[int]] = {i: set() for i in range(10)}
+DS_TASKS: dict[int, set[int]] = {i: set() for i in range(10)}
 
 
-def get_task(ds: str) -> Set[int]:
+def get_task(ds: str) -> set[int]:
     return DS_TASKS.get(int(ds or 0))
 
 
@@ -29,7 +28,7 @@ def get_task(ds: str) -> Set[int]:
     & filters.me
     & ~filters.forwarded
 )
-async def _ds(_, m):
+async def _ds(c, m):
     """
     Start ds, ds1 - ds9
     Usage: ds [delay] [count] [text/reply]
@@ -52,7 +51,7 @@ async def _ds(_, m):
         if chat_id not in get_task(ds):
             break
         try:
-            await copy(message, chat_id, delay)
+            await copy(c, message, chat_id, delay)
         except SlowmodeWait:
             pass
         except RPCError:
@@ -119,12 +118,13 @@ async def _dsclear(_, m):
 
 
 async def copy(
-    message: Union[str, Message],
+    client: UserClient,
+    message: str | Message,
     chat_id: int,
-    time: Union[int, float],
+    time: int | float,
 ) -> None:
     if isinstance(message, str):
-        await message.client.send_message(
+        await client.send_message(
             chat_id,
             message,
             parse_mode=ParseMode.DEFAULT,
@@ -144,8 +144,8 @@ async def copy(
 async def eor(
     message: Message,
     text: str,
-    time: Union[int, float],
-) -> Union[Message, bool]:
+    time: int | float,
+) -> Message | bool:
     try:
         msg = await message.edit(
             text,

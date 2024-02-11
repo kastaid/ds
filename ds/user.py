@@ -12,9 +12,9 @@ from pyrogram.client import Client
 from pyrogram.enums import ParseMode
 from pyrogram.errors import RPCError
 from pyrogram.types import User, CallbackQuery
-from ds import PROJECT, StartTime, Root
-from ds.config import Var
-from ds.helpers import time_formatter
+from . import PROJECT, StartTime, Root
+from .config import Var
+from .helpers import time_formatter
 
 
 class UserClient(Client):
@@ -62,7 +62,7 @@ class UserClient(Client):
 
     async def answer(
         self,
-        callback,
+        callback: CallbackQuery,
         **args,
     ) -> None:
         try:

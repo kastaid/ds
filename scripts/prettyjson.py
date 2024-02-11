@@ -5,19 +5,16 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
-from json import load, dump
+from json import dump, load
 from . import Root
 
-EXCLUDE = (
-    ".mypy_cache",
-    "db",
-)
+EXCLUDE = (".mypy_cache", "db")
 
 
 def main() -> None:
     for p in filter(lambda x: not str(x.parent).endswith(EXCLUDE), Root.rglob("*.json")):
         try:
-            with open(p, mode="r", encoding="utf-8") as f:
+            with open(p, encoding="utf-8") as f:
                 data = load(f)
             with open(p, mode="w", encoding="utf-8") as f:
                 dump(data, f, indent=4, sort_keys=False, ensure_ascii=False)
@@ -27,4 +24,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    SystemExit(main())
+    raise SystemExit(main())

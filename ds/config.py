@@ -7,7 +7,7 @@
 
 from os import getenv
 from dotenv import load_dotenv, find_dotenv
-from ds import WORKERS
+from . import WORKERS
 
 load_dotenv(find_dotenv("config.env"))
 
@@ -20,7 +20,7 @@ def tobool(val: str) -> int:
     val = val.lower()
     if val in ("y", "yes", "t", "true", "on", "1"):
         return 1
-    elif val in ("n", "no", "f", "false", "off", "0"):
+    if val in ("n", "no", "f", "false", "off", "0"):
         return 0
     raise ValueError("invalid truth value %r" % (val,))
 

@@ -9,7 +9,7 @@ import logging
 import sys
 from datetime import date
 from loguru import logger as LOG
-from ds import PROJECT
+from . import PROJECT
 
 LOG.remove(0)
 LOG.add(

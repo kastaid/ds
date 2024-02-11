@@ -15,6 +15,5 @@ README.md
 requirements-dev.txt
 run.py
 scripts
-setup.cfg
-manifest.json
-version.py
+pyproject.toml
+.ruff*
