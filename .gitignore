@@ -136,3 +136,5 @@ logs
 *.db
 *.session*
 alembic*
+unknown_errors.txt
+.ruff*

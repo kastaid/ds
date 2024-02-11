@@ -8,9 +8,9 @@
 import sys
 import uvloop
 from pyrogram.sync import idle
-from ds.logger import LOG
-from ds.patcher import *  # noqa
-from ds.user import UserClient
+from .logger import LOG
+from .patcher import *  # noqa
+from .user import UserClient
 
 
 async def main() -> None:

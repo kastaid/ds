@@ -7,26 +7,21 @@
 
 import logging
 from asyncio import sleep
+from collections.abc import Callable
 from functools import wraps
-from typing import (
-    Any,
-    Tuple,
-    Callable,
-    T,
-    Type,
-)
+from typing import Any, T
 import pyrogram.client
 import pyrogram.errors
 import pyrogram.types.messages_and_media.message
-from ds.logger import LOG
+from .logger import LOG
 
 
 def patch(target: Any):
-    def is_patchable(item: Tuple[str, Any]) -> bool:
+    def is_patchable(item: tuple[str, Any]) -> bool:
         return getattr(item[1], "patchable", False)
 
     @wraps(target)
-    def wrapper(container: Type[T]) -> T:
+    def wrapper(container: type[T]) -> T:
         for name, func in filter(is_patchable, container.__dict__.items()):
             old = getattr(target, name, None)
             if old is not None:
