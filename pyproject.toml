@@ -4,7 +4,6 @@ show-fixes = true
 line-length = 120
 indent-width = 4
 target-version = "py312"
-extend-exclude = ["version.py"]
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
@@ -60,4 +59,3 @@ combine_as_imports = true
 default_section = "THIRDPARTY"
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
 known_first_party = "ds"
-extend_skip = "version.py"
