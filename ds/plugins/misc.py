@@ -38,10 +38,7 @@ async def _ping(c, m):
         msg = await m.edit("Ping !")
     end = monotonic()
     await msg.edit(
-        "🏓 Pong !!\n<b>Speed</b> - <code>{:.3f}s</code>\n<b>Uptime</b> - <code>{}</code>".format(
-            end - start,
-            time_formatter((time() - StartTime) * 1000),
-        ),
+        f"🏓 Pong !!\n<b>Speed</b> - <code>{end - start:.3f}s</code>\n<b>Uptime</b> - <code>{time_formatter((time() - StartTime) * 1000)}</code>"
     )
 
 
