@@ -33,7 +33,7 @@ class UserClient(Client):
                 "root": "".join((PROJECT, ".plugins")),
                 "exclude": [],
             },
-            sleep_threshold=30,
+            sleep_threshold=15,
         )
 
     async def get_me(

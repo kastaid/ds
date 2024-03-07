@@ -7,16 +7,14 @@
 
 import sys
 import uvloop
-from pyrogram.sync import idle
+from pyrogram.sync import compose
 from .logger import LOG
 from .patcher import *  # noqa
 from .user import UserClient
 
 
 async def main() -> None:
-    await UserClient().start()
-    await idle()
-    await UserClient().stop()
+    await compose([UserClient()])
 
 
 if __name__ == "__main__":
