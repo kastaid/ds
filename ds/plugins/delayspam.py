@@ -8,7 +8,7 @@
 from asyncio import sleep
 from pyrogram import filters
 from pyrogram.enums import ParseMode
-from pyrogram.errors import RPCError, SlowmodeWait
+from pyrogram.errors import RPCError
 from pyrogram.types import Message
 from ds.config import Var
 from ds.user import UserClient
@@ -52,9 +52,9 @@ async def _ds(c, m):
             break
         try:
             await copy(c, message, chat_id, delay)
-        except SlowmodeWait:
-            pass
         except RPCError:
+            pass
+        except:
             break
     get_task(ds).discard(chat_id)
 
