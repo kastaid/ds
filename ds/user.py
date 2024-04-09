@@ -59,6 +59,7 @@ class UserClient(Client):
         self.log.info(user_details)
         done = time_formatter((time() - StartTime) * 1000)
         self.log.success(f">> 🔥 USERBOT RUNNING IN {done} !!")
+        Var.IS_STARTUP = True
 
     async def answer(
         self,
