@@ -12,7 +12,7 @@ from . import WORKERS
 load_dotenv(find_dotenv("config.env"))
 
 
-def tobool(val: str) -> int:
+def tobool(val: str) -> int | None:
     """
     Convert a string representation of truth to true (1) or false (0).
     https://github.com/python/cpython/blob/main/Lib/distutils/util.py
@@ -32,6 +32,7 @@ class Var:
     STRING_SESSION: str = getenv("STRING_SESSION", "").strip()
     WORKERS: int = int(getenv("WORKERS", str(WORKERS).strip()))
     HANDLER: str = getenv("HANDLER", "").strip()
+    IS_STARTUP: bool = False
 
 
 del load_dotenv, find_dotenv, WORKERS

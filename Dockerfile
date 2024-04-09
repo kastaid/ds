@@ -5,6 +5,7 @@ ENV TZ=Asia/Jakarta \
     DEBIAN_FRONTEND=noninteractive \
     VIRTUAL_ENV=/opt/venv \
     PATH=/opt/venv/bin:/app/bin:$PATH
+ARG LANG=en_US
 
 WORKDIR /app
 COPY . .
@@ -15,7 +16,7 @@ RUN set -ex \
         locales \
         tzdata \
         build-essential \
-    && localedef --quiet -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
+    && localedef --quiet -i ${LANG} -c -f UTF-8 -A /usr/share/locale/locale.alias ${LANG}.UTF-8 \
     && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone \
     && dpkg-reconfigure --force -f noninteractive tzdata >/dev/null 2>&1 \
     && python3 -m venv $VIRTUAL_ENV \

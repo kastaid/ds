@@ -6,6 +6,7 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from asyncio import sleep, gather
+from contextlib import suppress
 from time import time, monotonic
 from pyrogram import filters
 from pyrogram.errors import RPCError
@@ -144,17 +145,13 @@ async def _purge(c, m):
             continue
         chunk.append(msg.id)
         if len(chunk) >= 100:
-            try:
+            with suppress(RPCError):
                 await c.delete_messages(chat_id, chunk)
-            except RPCError:
-                pass
             chunk.clear()
             await sleep(1)
     if len(chunk) > 0:
-        try:
+        with suppress(RPCError):
             await c.delete_messages(chat_id, chunk)
-        except RPCError:
-            pass
     await m.delete()
 
 
@@ -185,8 +182,6 @@ async def _read(c, m):
             )
         ],
     )
-    try:
+    with suppress(RPCError):
         await c.read_chat_history(chat_id)
-    except RPCError:
-        pass
     await m.delete()
