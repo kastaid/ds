@@ -58,6 +58,7 @@ class Client:
             await sleep(fw.value)
             return await self.invoke(*args, **kwargs)
         except (
+            TimeoutError,
             pyrogram.errors.UserIsBlocked,
             pyrogram.errors.PersistentTimestampInvalid,
         ):
