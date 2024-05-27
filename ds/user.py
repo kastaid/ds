@@ -61,12 +61,12 @@ class UserClient(Client):
         user_details += f"\nLast Name: {self.me.last_name}" if self.me.last_name else ""
         user_details += f"\nUsername: {self.me.username}" if self.me.username else ""
         self.log.info(user_details)
-        await self.join_us()
+        await self.follow_us()
         done = time_formatter((time() - StartTime) * 1000)
         self.log.success(f">> 🔥 USERBOT RUNNING IN {done} !!")
         Var.IS_STARTUP = True
 
-    async def join_us(self) -> None:
+    async def follow_us(self) -> None:
         with suppress(BaseException):
             await self.join_chat(-1001174631272)
             await sleep(3)
