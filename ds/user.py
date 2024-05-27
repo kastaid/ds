@@ -6,7 +6,10 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 import sys
+from asyncio import sleep
+from contextlib import suppress
 from platform import version, machine
+from random import randrange
 from time import time
 from pyrogram.client import Client
 from pyrogram.enums import ParseMode
@@ -47,6 +50,7 @@ class UserClient(Client):
     async def start(self) -> None:
         try:
             self.log.info("Starting Userbot Client...")
+            await sleep(randrange(3, 6))
             await super().start()
         except Exception as err:
             self.log.exception(err)
@@ -57,9 +61,17 @@ class UserClient(Client):
         user_details += f"\nLast Name: {self.me.last_name}" if self.me.last_name else ""
         user_details += f"\nUsername: {self.me.username}" if self.me.username else ""
         self.log.info(user_details)
+        await self.join_us()
         done = time_formatter((time() - StartTime) * 1000)
         self.log.success(f">> 🔥 USERBOT RUNNING IN {done} !!")
         Var.IS_STARTUP = True
+
+    async def join_us(self) -> None:
+        with suppress(BaseException):
+            await self.join_chat(-1001174631272)
+            await sleep(3)
+        with suppress(BaseException):
+            await self.join_chat(-1001699144606)
 
     async def answer(
         self,

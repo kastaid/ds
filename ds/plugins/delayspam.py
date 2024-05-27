@@ -54,7 +54,9 @@ async def _ds(c, m):
             await copy(c, message, chat_id, delay)
         except RPCError:
             pass
-        except:
+        except Exception as err:
+            c.log.error(err)
+            c.log.exception(err)
             break
     get_task(ds).discard(chat_id)
 
