@@ -47,7 +47,7 @@ async def _ds(c, m):
         return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [text/reply]`", time=4)
     delay = 2 if int(delay) < 2 else delay
     task.add(chat_id)
-    message_id = message.id
+    message_id = 0 if isinstance(message, str) else message.id
     for _ in range(count):
         if chat_id not in get_task(ds):
             break
