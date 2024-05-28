@@ -47,11 +47,18 @@ async def _ds(c, m):
         return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [text/reply]`", time=4)
     delay = 2 if int(delay) < 2 else delay
     task.add(chat_id)
+    message_id = message.id
     for _ in range(count):
         if chat_id not in get_task(ds):
             break
         try:
-            await copy(c, message, chat_id, delay)
+            await copy(
+                c,
+                message,
+                chat_id,
+                message_id,
+                delay,
+            )
         except RPCError:
             pass
         except Exception as err:
@@ -123,6 +130,7 @@ async def copy(
     client: UserClient,
     message: str | Message,
     chat_id: int,
+    message_id: int,
     time: int | float,
 ) -> None:
     if isinstance(message, str):
@@ -130,14 +138,13 @@ async def copy(
             chat_id,
             message,
             parse_mode=ParseMode.DEFAULT,
-            disable_web_page_preview=True,
-            disable_notification=True,
         )
     else:
-        await message.copy(
+        await client.copy_message(
             chat_id,
+            from_chat_id=chat_id,
+            message_id=message_id,
             parse_mode=ParseMode.DEFAULT,
-            disable_notification=True,
             reply_to_message_id=None,
         )
     await sleep(time)

@@ -55,7 +55,7 @@ class Client:
             return await self.old_invoke(*args, **kwargs)
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
-            await sleep(fw.value)
+            await sleep(fw.value + 5)
             return await self.invoke(*args, **kwargs)
         except (
             TimeoutError,
@@ -70,7 +70,7 @@ class Client:
             return await self.old_resolve_peer(*args, **kwargs)
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
-            await sleep(fw.value)
+            await sleep(fw.value + 5)
             return await self.resolve_peer(*args, **kwargs)
         except pyrogram.errors.PeerIdInvalid:
             pass
@@ -81,7 +81,7 @@ class Client:
             return await self.old_save_file(*args, **kwargs)
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
-            await sleep(fw.value)
+            await sleep(fw.value + 5)
             return await self.save_file(*args, **kwargs)
 
 
