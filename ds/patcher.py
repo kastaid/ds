@@ -9,6 +9,7 @@ import logging
 from asyncio import sleep
 from collections.abc import Callable
 from functools import wraps
+from random import randrange
 from typing import Any, T
 import pyrogram.client
 import pyrogram.errors
@@ -55,7 +56,8 @@ class Client:
             return await self.old_invoke(*args, **kwargs)
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
-            await sleep(fw.value + 5)
+            sec = fw.value + randrange(5, 15)
+            await sleep(sec)
             return await self.invoke(*args, **kwargs)
         except (
             TimeoutError,
@@ -70,7 +72,8 @@ class Client:
             return await self.old_resolve_peer(*args, **kwargs)
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
-            await sleep(fw.value + 5)
+            sec = fw.value + randrange(5, 15)
+            await sleep(sec)
             return await self.resolve_peer(*args, **kwargs)
         except pyrogram.errors.PeerIdInvalid:
             pass
@@ -81,7 +84,8 @@ class Client:
             return await self.old_save_file(*args, **kwargs)
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
-            await sleep(fw.value + 5)
+            sec = fw.value + randrange(5, 15)
+            await sleep(sec)
             return await self.save_file(*args, **kwargs)
 
 
