@@ -64,7 +64,7 @@ async def _ds(c, m):
             c.log.exception(err)
             break
     get_task(ds).discard(chat_id)
-    Var.IS_RUNNING.update({"state": False, "count": 0})
+    Var.IS_RUNNING["state"] = False
 
 
 @UserClient.on_message(
@@ -86,7 +86,7 @@ async def _dscancel(_, m):
     if chat_id not in task:
         return await eor(m, f"No running •ds{ds}• in current chat.", time=2)
     task.discard(chat_id)
-    Var.IS_RUNNING.update({"state": False, "count": 0})
+    Var.IS_RUNNING["state"] = False
     await eor(m, f"`cancelled ds{ds} in current chat`", time=2)
 
 
@@ -105,7 +105,7 @@ async def _dsstop(_, m):
     """
     ds = m.command[0].lower()[2:3].replace("s", "")
     get_task(ds).clear()
-    Var.IS_RUNNING.update({"state": False, "count": 0})
+    Var.IS_RUNNING["state"] = False
     await eor(m, f"`stopped ds{ds} in all chats`", time=4)
 
 
@@ -124,7 +124,7 @@ async def _dsclear(_, m):
     """
     for task in Var.DS_TASKS.values():
         task.clear()
-    Var.IS_RUNNING.update({"state": False, "count": 0})
+    Var.IS_RUNNING["state"] = False
     await eor(m, "`clear all ds*`", time=4)
 
 
@@ -138,9 +138,11 @@ async def copy(
     if not Var.IS_RUNNING["state"]:
         Var.IS_RUNNING["state"] = True
     else:
-        while Var.IS_RUNNING["state"]:
-            Var.IS_RUNNING["count"] += 1
-            await sleep(0.5)
+        while True:
+            if Var.IS_RUNNING["state"]:
+                await sleep(0.5)
+            else:
+                break
     if isinstance(message, str):
         await client.send_message(
             chat_id,
@@ -155,7 +157,7 @@ async def copy(
             parse_mode=ParseMode.DEFAULT,
             reply_to_message_id=None,
         )
-    Var.IS_RUNNING.update({"state": False, "count": 0})
+    Var.IS_RUNNING["state"] = False
     await sleep(time)
 
 
