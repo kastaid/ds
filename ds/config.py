@@ -6,6 +6,7 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from os import getenv
+from typing import Any, ClassVar
 from dotenv import load_dotenv, find_dotenv
 from . import WORKERS
 
@@ -33,6 +34,8 @@ class Var:
     WORKERS: int = int(getenv("WORKERS", str(WORKERS).strip()))
     HANDLER: str = getenv("HANDLER", "").strip()
     IS_STARTUP: bool = False
+    IS_RUNNING: ClassVar[dict[str, Any]] = {"state": False, "count": 0}
+    DS_TASKS: ClassVar[dict[int, set[int]]] = {i: set() for i in range(10)}
 
 
 del load_dotenv, find_dotenv, WORKERS
