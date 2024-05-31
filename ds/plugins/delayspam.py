@@ -13,9 +13,11 @@ from pyrogram.types import Message
 from ds.config import Var
 from ds.user import UserClient
 
+DS_TASKS: [dict[int, set[int]]] = {i: set() for i in range(10)}
+
 
 def get_task(ds: str) -> set[int]:
-    return Var.DS_TASKS.get(int(ds or 0))
+    return DS_TASKS.get(int(ds or 0))
 
 
 @UserClient.on_message(
@@ -122,7 +124,7 @@ async def _dsclear(_, m):
     Clear and stop all ds
     usage: dsclear
     """
-    for task in Var.DS_TASKS.values():
+    for task in DS_TASKS.values():
         task.clear()
     Var.IS_RUNNING = False
     await eor(m, "`clear all ds*`", time=4)
