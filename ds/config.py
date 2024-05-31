@@ -33,7 +33,6 @@ class Var:
     WORKERS: int = int(getenv("WORKERS", str(WORKERS).strip()))
     HANDLER: str = getenv("HANDLER", "").strip()
     IS_STARTUP: bool = False
-    IS_RUNNING: bool = False
 
 
 del load_dotenv, find_dotenv, WORKERS
