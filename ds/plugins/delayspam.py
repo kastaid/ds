@@ -13,11 +13,9 @@ from pyrogram.types import Message
 from ds.config import Var
 from ds.user import UserClient
 
-DS_TASKS: [dict[int, set[int]]] = {i: set() for i in range(10)}
-
 
 def get_task(ds: str) -> set[int]:
-    return DS_TASKS.get(int(ds or 0))
+    return Var.DS_TASKS.get(int(ds or 0))
 
 
 @UserClient.on_message(
@@ -65,7 +63,13 @@ async def _ds(c, m):
         except Exception as err:
             c.log.error(err)
             c.log.exception(err)
-            break
+            if chat_id not in Var.ERROR_RETRY:
+                Var.ERROR_RETRY.update({chat_id: 1})
+            else:
+                Var.ERROR_RETRY.update({chat_id: Var.ERROR_RETRY[chat_id] + 1})
+            if chat_id in Var.ERROR_RETRY and Var.ERROR_RETRY[chat_id] > 3:
+                Var.ERROR_RETRY.pop(chat_id)
+                break
     get_task(ds).discard(chat_id)
 
 
@@ -122,7 +126,7 @@ async def _dsclear(_, m):
     Clear and stop all ds
     usage: dsclear
     """
-    for task in DS_TASKS.values():
+    for task in Var.DS_TASKS.values():
         task.clear()
     await eor(m, "`clear all ds*`", time=4)
 
@@ -146,7 +150,6 @@ async def copy(
             from_chat_id=chat_id,
             message_id=message_id,
             parse_mode=ParseMode.DEFAULT,
-            reply_to_message_id=None,
         )
     await sleep(time)
 
