@@ -143,6 +143,7 @@ async def copy(
             chat_id,
             message,
             parse_mode=ParseMode.DEFAULT,
+            disable_notification=True,
         )
     else:
         await client.copy_message(
@@ -150,6 +151,7 @@ async def copy(
             from_chat_id=chat_id,
             message_id=message_id,
             parse_mode=ParseMode.DEFAULT,
+            disable_notification=True,
         )
     await sleep(time)
 
