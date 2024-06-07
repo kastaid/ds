@@ -29,7 +29,7 @@ def get_task(ds: str) -> set[int]:
 async def _ds(c, m):
     """
     Start ds, ds1 - ds9
-    Usage: ds [delay] [count] [forward] [text/reply]
+    Usage: ds [delay] [count] [forward (reply only)] [text/reply]
     """
     chat_id = m.chat.id
     cmd = m.command
@@ -42,18 +42,14 @@ async def _ds(c, m):
         args = cmd[1:]
         delay, count = int(args[0]), int(args[1])
     except BaseException:
-        return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [forward] [text/reply]`", time=4)
+        return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [forward (reply only)] [text/reply]`", time=4)
     is_forward = False
     if m.reply_to_message_id:
         message = m.reply_to_message
         message_id = message.id
+        is_forward = "forward" in m.text.lower()
     else:
-        if "forward" in m.text.lower():
-            is_forward = True
-            offset = m.text.markdown.split(" ")[4:]
-        else:
-            offset = m.text.markdown.split(" ")[3:]
-        message = " ".join(offset)
+        message = " ".join(m.text.markdown.split(" ")[3:])
         message_id = 0
     delay = 2 if int(delay) < 2 else delay
     task.add(chat_id)
