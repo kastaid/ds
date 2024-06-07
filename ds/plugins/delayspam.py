@@ -43,7 +43,7 @@ async def _ds(c, m):
         delay, count = int(args[0]), int(args[1])
     except BaseException:
         return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [forward (reply only)] [text/reply]`", time=4)
-    is_forward = False
+    is_text, is_forward = False, False
     if m.reply_to_message_id:
         message = m.reply_to_message
         message_id = message.id
@@ -51,6 +51,7 @@ async def _ds(c, m):
     else:
         message = " ".join(m.text.markdown.split(" ")[3:])
         message_id = 0
+        is_text = True
     delay = 2 if int(delay) < 2 else delay
     task.add(chat_id)
     for _ in range(count):
@@ -58,7 +59,7 @@ async def _ds(c, m):
             break
         try:
             await sleep(0.5)
-            await copy(
+            result = await send_message(
                 c,
                 message,
                 chat_id,
@@ -66,6 +67,8 @@ async def _ds(c, m):
                 delay,
                 is_forward,
             )
+            if not is_text:
+                message_id = getattr(result, "id", message_id)
         except RPCError:
             pass
         except Exception as err:
@@ -139,16 +142,16 @@ async def _dsclear(_, m):
     await eor(m, "`clear all ds*`", time=4)
 
 
-async def copy(
+async def send_message(
     client: UserClient,
     message: str | Message,
     chat_id: int,
     message_id: int,
     delay: int | float,
     is_forward: bool,
-) -> None:
+) -> Message:
     if isinstance(message, str):
-        await client.send_message(
+        result = await client.send_message(
             chat_id,
             message,
             parse_mode=ParseMode.DEFAULT,
@@ -156,14 +159,14 @@ async def copy(
         )
     else:
         if is_forward:
-            await client.forward_messages(
+            result = await client.forward_messages(
                 chat_id,
                 from_chat_id=chat_id,
                 message_ids=message_id,
                 disable_notification=True,
             )
         else:
-            await client.copy_message(
+            result = await client.copy_message(
                 chat_id,
                 from_chat_id=chat_id,
                 message_id=message_id,
@@ -171,6 +174,7 @@ async def copy(
                 disable_notification=True,
             )
     await sleep(delay)
+    return result
 
 
 async def eor(
@@ -179,15 +183,15 @@ async def eor(
     time: int | float,
 ) -> Message | bool:
     try:
-        msg = await message.edit(
+        result = await message.edit(
             text,
             parse_mode=ParseMode.MARKDOWN,
             disable_web_page_preview=True,
         )
         if not time:
-            return msg
+            return result
     except BaseException:
-        msg = await message.reply(
+        result = await message.reply(
             text,
             quote=True,
             parse_mode=ParseMode.MARKDOWN,
@@ -195,6 +199,6 @@ async def eor(
             disable_notification=True,
         )
         if not time:
-            return msg
+            return result
     await sleep(time)
-    return await msg.delete()
+    return await result.delete()
