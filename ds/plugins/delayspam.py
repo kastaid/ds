@@ -36,13 +36,13 @@ async def _ds(c, m):
     ds = cmd[0].lower()[2:3]
     task = get_task(ds)
     if chat_id in task:
-        return await eor(m, f"Please wait until previous •ds{ds}• is finished or cancel it.", time=2)
+        return await eor(m, f"Please wait until previous •ds{ds}• is finished or cancel it.", time=6)
     await m.delete()
     try:
         args = cmd[1:]
         delay, count = int(args[0]), int(args[1])
     except BaseException:
-        return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [forward (reply only)] [text/reply]`", time=4)
+        return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [forward (reply only)] [text/reply]`", time=6)
     is_text, is_forward = False, False
     if m.reply_to_message_id:
         message = m.reply_to_message
@@ -58,7 +58,7 @@ async def _ds(c, m):
         if chat_id not in get_task(ds):
             break
         try:
-            await sleep(0.5)
+            await sleep(1)
             result = await send_message(
                 c,
                 message,
@@ -101,9 +101,9 @@ async def _dscancel(_, m):
     ds = m.command[0].lower()[2:3].replace("c", "")
     task = get_task(ds)
     if chat_id not in task:
-        return await eor(m, f"No running •ds{ds}• in current chat.", time=2)
+        return await eor(m, f"No running •ds{ds}• in current chat.", time=6)
     task.discard(chat_id)
-    await eor(m, f"`cancelled ds{ds} in current chat`", time=2)
+    await eor(m, f"`cancelled ds{ds} in current chat`", time=6)
 
 
 @UserClient.on_message(
@@ -121,7 +121,7 @@ async def _dsstop(_, m):
     """
     ds = m.command[0].lower()[2:3].replace("s", "")
     get_task(ds).clear()
-    await eor(m, f"`stopped ds{ds} in all chats`", time=4)
+    await eor(m, f"`stopped ds{ds} in all chats`", time=0)
 
 
 @UserClient.on_message(
@@ -139,7 +139,7 @@ async def _dsclear(_, m):
     """
     for task in Var.DS_TASKS.values():
         task.clear()
-    await eor(m, "`clear all ds*`", time=4)
+    await eor(m, "`clear all ds*`", time=0)
 
 
 async def send_message(
