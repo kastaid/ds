@@ -29,7 +29,7 @@ Generate STRING_SESSION at https://t.me/strgen_bot (pyrofork).
 ```sh
 git pull \
   && docker system prune -f \
-  && docker compose up --detach --build \
+  && docker compose up --detach --build --force-recreate \
   && docker compose logs -f
 ```
 

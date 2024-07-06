@@ -31,7 +31,7 @@ class Var:
     API_ID: int = int(getenv("API_ID", "0").strip())
     API_HASH: str = getenv("API_HASH", "").strip()
     STRING_SESSION: str = getenv("STRING_SESSION", "").strip()
-    WORKERS: int = int(getenv("WORKERS", str(WORKERS).strip()))
+    WORKERS: int = int(getenv("WORKERS", str(WORKERS)).strip())
     HANDLER: str = getenv("HANDLER", "").strip()
     IS_STARTUP: bool = False
     DS_TASKS: ClassVar[dict[int, set[int]]] = {i: set() for i in range(10)}
