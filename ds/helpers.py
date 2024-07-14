@@ -29,7 +29,7 @@ def get_terminal_logs() -> list[str]:
     return sorted(map(str, (Root / "logs").rglob("*.log")))
 
 
-def restart() -> None:
+def restart(update: bool = False) -> None:
     os.system("clear")
     try:
         import psutil
@@ -39,6 +39,7 @@ def restart() -> None:
             os.close(p.fd)
     except BaseException:
         pass
-    reqs = Root / "requirements.txt"
-    os.system(f"{sys.executable} -m pip install --disable-pip-version-check --default-timeout=100 -U -r {reqs}")
+    if update:
+        reqs = Root / "requirements.txt"
+        os.system(f"{sys.executable} -m pip install --disable-pip-version-check --default-timeout=100 -U -r {reqs}")
     os.execl(sys.executable, sys.executable, "-m", PROJECT)
