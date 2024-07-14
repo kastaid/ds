@@ -9,7 +9,7 @@ from asyncio import sleep, gather
 from contextlib import suppress
 from time import time, monotonic
 from pyrogram import filters
-from pyrogram.errors import RPCError
+from pyrogram.errors import RPCError, UsersTooMuch
 from pyrogram.raw.functions import Ping
 from pyrogram.raw.functions.messages import ReadMentions, ReadReactions
 from ds import StartTime
@@ -57,7 +57,7 @@ async def _restart(_, m):
     Usage: restart
     """
     await m.edit("Restarting Userbot...")
-    restart()
+    restart(update=True)
 
 
 @UserClient.on_message(
@@ -184,4 +184,84 @@ async def _read(c, m):
     )
     with suppress(RPCError):
         await c.read_chat_history(chat_id)
+    await m.delete()
+
+
+@UserClient.on_message(
+    filters.command(
+        "join",
+        prefixes=Var.HANDLER,
+    )
+    & filters.me
+    & filters.reply
+    & ~filters.forwarded
+)
+async def _join(c, m):
+    """
+    Join to the chat and retry when too much users
+    Usage: join [reply (username/id)]
+    """
+    chat_id = m.reply_to_message.text
+    if not chat_id:
+        return
+    if chat_id.isdecimal() or (chat_id.startswith("-") and chat_id[1:].isdecimal()):
+        chat_id = int(chat_id)
+    count, state = 0, False
+    while True:
+        try:
+            state = bool(await c.join_chat(chat_id))
+        except UsersTooMuch:
+            count += 1
+            await m.edit(rf"🔃 Join retry {count}...")
+            await sleep(6)
+            continue
+        except BaseException:
+            break
+        if state:
+            break
+    text = rf"✅ Joined as {count}." if state else r"❌ Error"
+    await m.edit(text)
+
+
+@UserClient.on_message(
+    filters.command(
+        "leave",
+        prefixes=Var.HANDLER,
+    )
+    & filters.me
+    & filters.reply
+    & ~filters.forwarded
+)
+async def _leave(c, m):
+    """
+    Leave or delete to the chat
+    Usage: leave [reply (username/id)]
+    """
+    chat_id = m.reply_to_message.text
+    if not chat_id:
+        return
+    if chat_id.isdecimal() or (chat_id.startswith("-") and chat_id[1:].isdecimal()):
+        chat_id = int(chat_id)
+    state = False
+    with suppress(BaseException):
+        state = bool(await c.leave_chat(chat_id, delete=True))
+    text = r"✅ Leaved" if state else r"❌ Error"
+    await m.edit(text)
+
+
+@UserClient.on_message(
+    filters.command(
+        "kickme",
+        prefixes=Var.HANDLER,
+    )
+    & filters.me
+    & ~filters.forwarded
+)
+async def _kickme(c, m):
+    """
+    Leave or delete the current chat
+    Usage: kickme
+    """
+    with suppress(BaseException):
+        await c.leave_chat(m.chat.id, delete=True)
     await m.delete()
