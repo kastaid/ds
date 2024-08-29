@@ -1,6 +1,6 @@
 loguru==0.7.2
 python-dotenv==1.0.1
 uvloop==0.20.0
-pyrofork==2.3.42
+pyrofork==2.3.43
 TgCrypto==1.2.5
 psutil==6.0.0
