@@ -1,10 +1,12 @@
 services:
   ds:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: ds:latest
+    restart: on-failure
     volumes:
       - ./:/app
     env_file:
       - config.env
-    restart: on-failure
     network_mode: bridge
