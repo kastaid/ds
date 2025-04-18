@@ -16,7 +16,7 @@ git clone https://github.com/kastaid/ds \
 ```
 
 ## Create config file
-`nano -c config.env`
+`nano -c .env`
 ```sh
 API_ID=
 API_HASH=
