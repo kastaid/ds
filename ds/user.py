@@ -78,10 +78,8 @@ class UserClient(Client):
         callback: CallbackQuery,
         **args,
     ) -> None:
-        try:
+        with suppress(RPCError):
             await callback.answer(**args)
-        except RPCError:
-            pass
 
     async def try_delete(self, event) -> bool:
         if not event:
