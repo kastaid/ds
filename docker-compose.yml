@@ -1,8 +1,5 @@
 services:
   ds:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ds:latest
     restart: on-failure
     volumes:
