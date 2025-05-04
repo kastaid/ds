@@ -8,9 +8,9 @@
 import sys
 import uvloop
 from pyrogram.sync import compose
+from .kasta import KastaClient
 from .logger import LOG
 from .patcher import *  # noqa
-from .user import KastaClient
 
 
 async def main() -> None:
