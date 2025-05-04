@@ -11,7 +11,7 @@ from contextlib import suppress
 from platform import version, machine
 from random import randrange
 from time import time
-from pyrogram.client import Client
+from pyrogram.client import Client as RawClient
 from pyrogram.enums import ParseMode
 from pyrogram.errors import RPCError
 from pyrogram.types import User, CallbackQuery
@@ -20,7 +20,7 @@ from .config import Var
 from .helpers import time_formatter
 
 
-class UserClient(Client):
+class KastaClient(RawClient):
     def __init__(self):
         self._me: User | None = None
         super().__init__(
@@ -92,8 +92,6 @@ class UserClient(Client):
         return deleted
 
     async def stop(self, **_) -> None:
-        try:
+        with suppress(BaseException):
             await super().stop()
             self.log.info("Stopped Client.")
-        except BaseException:
-            pass

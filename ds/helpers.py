@@ -30,7 +30,8 @@ def get_terminal_logs() -> list[str]:
 
 
 def restart(update: bool = False) -> None:
-    os.system("clear")
+    if update:
+        os.system("clear")
     try:
         import psutil
 
