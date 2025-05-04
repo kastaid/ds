@@ -10,11 +10,11 @@ import uvloop
 from pyrogram.sync import compose
 from .logger import LOG
 from .patcher import *  # noqa
-from .user import UserClient
+from .user import KastaClient
 
 
 async def main() -> None:
-    await compose([UserClient()])
+    await compose([KastaClient()])
 
 
 if __name__ == "__main__":

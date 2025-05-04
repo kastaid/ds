@@ -11,14 +11,14 @@ from pyrogram.enums import ParseMode
 from pyrogram.errors import RPCError
 from pyrogram.types import Message
 from ds.config import Var
-from ds.user import UserClient
+from ds.kasta import KastaClient
 
 
 def get_task(ds: str) -> set[int]:
     return Var.DS_TASKS.get(int(ds or 0))
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         [f"ds{i}" if i != 0 else "ds" for i in range(10)],
         prefixes=Var.HANDLER,
@@ -84,7 +84,7 @@ async def _ds(c, m):
     get_task(ds).discard(chat_id)
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         [f"ds{i}cancel" if i != 0 else "dscancel" for i in range(10)],
         prefixes=Var.HANDLER,
@@ -106,7 +106,7 @@ async def _dscancel(_, m):
     await eor(m, f"`cancelled ds{ds} in current chat`", time=6)
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         [f"ds{i}stop" if i != 0 else "dsstop" for i in range(10)],
         prefixes=Var.HANDLER,
@@ -124,7 +124,7 @@ async def _dsstop(_, m):
     await eor(m, f"`stopped ds{ds} in all chats`", time=0)
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "dsclear",
         prefixes=Var.HANDLER,
@@ -143,7 +143,7 @@ async def _dsclear(_, m):
 
 
 async def send_message(
-    client: UserClient,
+    client: KastaClient,
     message: str | Message,
     chat_id: int,
     message_id: int,

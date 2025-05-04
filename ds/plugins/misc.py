@@ -15,10 +15,10 @@ from pyrogram.raw.functions.messages import ReadMentions, ReadReactions
 from ds import StartTime
 from ds.config import Var
 from ds.helpers import time_formatter, get_terminal_logs, restart
-from ds.user import UserClient
+from ds.kasta import KastaClient
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "ping",
         prefixes=Var.HANDLER,
@@ -43,7 +43,7 @@ async def _ping(c, m):
     )
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "restart",
         prefixes=Var.HANDLER,
@@ -60,7 +60,7 @@ async def _restart(_, m):
     restart(update=True)
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "logs",
         prefixes=Var.HANDLER,
@@ -84,7 +84,7 @@ async def _logs(_, m):
     await msg.delete()
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "id",
         prefixes=Var.HANDLER,
@@ -101,7 +101,7 @@ async def _id(_, m):
     await m.edit(f"<code>{who}</code>")
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "del",
         prefixes=Var.HANDLER,
@@ -119,7 +119,7 @@ async def _del(_, m):
         await m.reply_to_message.delete()
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "purge",
         prefixes=Var.HANDLER,
@@ -155,7 +155,7 @@ async def _purge(c, m):
     await m.delete()
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "read",
         prefixes=Var.HANDLER,
@@ -187,7 +187,7 @@ async def _read(c, m):
     await m.delete()
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "join",
         prefixes=Var.HANDLER,
@@ -223,7 +223,7 @@ async def _join(c, m):
     await m.edit(text)
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "leave",
         prefixes=Var.HANDLER,
@@ -249,7 +249,7 @@ async def _leave(c, m):
     await m.edit(text)
 
 
-@UserClient.on_message(
+@KastaClient.on_message(
     filters.command(
         "kickme",
         prefixes=Var.HANDLER,
