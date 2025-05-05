@@ -1,5 +1,7 @@
 services:
   ds:
+    build:
+      context: .
     image: ds:latest
     restart: on-failure
     volumes:
