@@ -5,9 +5,8 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
+import asyncio
 import sys
-from asyncio import sleep
-from contextlib import suppress
 from platform import version, machine
 from random import randrange
 from time import time
@@ -50,16 +49,20 @@ class KastaClient(RawClient):
     async def start(self) -> None:
         try:
             self.log.info("Starting Userbot Client...")
-            await sleep(randrange(3, 6))
+            await asyncio.sleep(randrange(3, 6))
             await super().start()
         except Exception as err:
             self.log.exception(err)
             self.log.error("Userbot Client exiting.")
             sys.exit(1)
         self.me = await self.get_me()
-        user_details = f"Userbot Client details:\nID: {self.me.id}\nFirst Name: {self.me.first_name}"
-        user_details += f"\nLast Name: {self.me.last_name}" if self.me.last_name else ""
-        user_details += f"\nUsername: {self.me.username}" if self.me.username else ""
+        user_details = "Userbot Client details:\n"
+        user_details += f"ID: {self.me.id}\n"
+        user_details += f"First Name: {self.me.first_name}"
+        if self.me.last_name:
+            user_details += f"\nLast Name: {self.me.last_name}"
+        if self.me.username:
+            user_details += f"\nUsername: @{self.me.username}"
         self.log.info(user_details)
         await self.follow_us()
         done = time_formatter((time() - StartTime) * 1000)
@@ -67,19 +70,25 @@ class KastaClient(RawClient):
         Var.IS_STARTUP = True
 
     async def follow_us(self) -> None:
-        with suppress(BaseException):
+        try:
             await self.join_chat(-1001174631272)
-            await sleep(3)
-        with suppress(BaseException):
+            await asyncio.sleep(3)
+        except BaseException:
+            pass
+        try:
             await self.join_chat(-1001699144606)
+        except BaseException:
+            pass
 
     async def answer(
         self,
         callback: CallbackQuery,
         **args,
     ) -> None:
-        with suppress(RPCError):
+        try:
             await callback.answer(**args)
+        except RPCError:
+            pass
 
     async def try_delete(self, event) -> bool:
         if not event:
@@ -92,6 +101,8 @@ class KastaClient(RawClient):
         return deleted
 
     async def stop(self, **_) -> None:
-        with suppress(BaseException):
+        try:
             await super().stop()
             self.log.info("Stopped Client.")
+        except BaseException:
+            pass

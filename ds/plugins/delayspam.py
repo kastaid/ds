@@ -5,7 +5,7 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
-from asyncio import sleep
+import asyncio
 from pyrogram import filters
 from pyrogram.enums import ParseMode
 from pyrogram.errors import RPCError
@@ -58,7 +58,7 @@ async def _ds(c, m):
         if chat_id not in get_task(ds):
             break
         try:
-            await sleep(1)
+            await asyncio.sleep(1)
             result = await send_message(
                 c,
                 message,
@@ -103,7 +103,7 @@ async def _dscancel(_, m):
     if chat_id not in task:
         return await eor(m, f"No running •ds{ds}• in current chat.", time=6)
     task.discard(chat_id)
-    await eor(m, f"`cancelled ds{ds} in current chat`", time=6)
+    await eor(m, f"`canceled ds{ds} in current chat`", time=6)
 
 
 @KastaClient.on_message(
@@ -173,7 +173,7 @@ async def send_message(
                 parse_mode=ParseMode.DEFAULT,
                 disable_notification=True,
             )
-    await sleep(delay)
+    await asyncio.sleep(delay)
     return result
 
 
@@ -200,5 +200,5 @@ async def eor(
         )
         if not time:
             return result
-    await sleep(time)
+    await asyncio.sleep(time)
     return await result.delete()
