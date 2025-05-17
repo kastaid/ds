@@ -5,8 +5,8 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
+import asyncio
 import logging
-from asyncio import sleep
 from collections.abc import Callable
 from functools import wraps
 from random import randrange
@@ -57,7 +57,7 @@ class Client:
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
             sec = fw.value + randrange(5, 15)
-            await sleep(sec)
+            await asyncio.sleep(sec)
             return await self.invoke(*args, **kwargs)
         except (
             TimeoutError,
@@ -73,7 +73,7 @@ class Client:
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
             sec = fw.value + randrange(5, 15)
-            await sleep(sec)
+            await asyncio.sleep(sec)
             return await self.resolve_peer(*args, **kwargs)
         except pyrogram.errors.PeerIdInvalid:
             pass
@@ -85,7 +85,7 @@ class Client:
         except pyrogram.errors.FloodWait as fw:
             self.log.warning(fw)
             sec = fw.value + randrange(5, 15)
-            await sleep(sec)
+            await asyncio.sleep(sec)
             return await self.save_file(*args, **kwargs)
 
 

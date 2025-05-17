@@ -5,8 +5,7 @@
 # Please read the MIT License in
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
-from asyncio import sleep, gather
-from contextlib import suppress
+import asyncio
 from time import time, monotonic
 from pyrogram import filters
 from pyrogram.errors import RPCError, UsersTooMuch
@@ -80,7 +79,7 @@ async def _logs(_, m):
             caption=f"Terminal Logs {count}",
             quote=False,
         )
-        await sleep(1)
+        await asyncio.sleep(1)
     await msg.delete()
 
 
@@ -145,13 +144,17 @@ async def _purge(c, m):
             continue
         chunk.append(msg.id)
         if len(chunk) >= 100:
-            with suppress(RPCError):
+            try:
                 await c.delete_messages(chat_id, chunk)
+            except RPCError:
+                pass
             chunk.clear()
-            await sleep(1)
+            await asyncio.sleep(1)
     if len(chunk) > 0:
-        with suppress(RPCError):
+        try:
             await c.delete_messages(chat_id, chunk)
+        except RPCError:
+            pass
     await m.delete()
 
 
@@ -173,7 +176,7 @@ async def _read(c, m):
         peer = await c.resolve_peer(chat_id)
     except RPCError:
         return
-    await gather(
+    await asyncio.gather(
         *[
             c.invoke(i)
             for i in (
@@ -182,8 +185,10 @@ async def _read(c, m):
             )
         ],
     )
-    with suppress(RPCError):
+    try:
         await c.read_chat_history(chat_id)
+    except RPCError:
+        pass
     await m.delete()
 
 
@@ -213,7 +218,7 @@ async def _join(c, m):
         except UsersTooMuch:
             count += 1
             await m.edit(rf"🔃 Join retry {count}...")
-            await sleep(6)
+            await asyncio.sleep(6)
             continue
         except BaseException:
             break
@@ -243,8 +248,10 @@ async def _leave(c, m):
     if chat_id.isdecimal() or (chat_id.startswith("-") and chat_id[1:].isdecimal()):
         chat_id = int(chat_id)
     state = False
-    with suppress(BaseException):
+    try:
         state = bool(await c.leave_chat(chat_id, delete=True))
+    except BaseException:
+        pass
     text = r"✅ Leaved" if state else r"❌ Error"
     await m.edit(text)
 
@@ -262,6 +269,8 @@ async def _kickme(c, m):
     Leave or delete the current chat
     Usage: kickme
     """
-    with suppress(BaseException):
+    try:
         await c.leave_chat(m.chat.id, delete=True)
+    except BaseException:
+        pass
     await m.delete()
