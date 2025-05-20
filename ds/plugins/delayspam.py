@@ -6,16 +6,17 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 import asyncio
-from pyrogram import filters
+from pyrogram import filters, errors
 from pyrogram.enums import ParseMode
-from pyrogram.errors import RPCError
 from pyrogram.types import Message
 from ds.config import Var
 from ds.kasta import KastaClient
 
+DS_TASKS: dict[int, dict[int, asyncio.Task]] = {i: {} for i in range(10)}
 
-def get_task(ds: str) -> set[int]:
-    return Var.DS_TASKS.get(int(ds or 0))
+
+def get_task_store(ds: int) -> dict[int, asyncio.Task]:
+    return DS_TASKS.get(ds)
 
 
 @KastaClient.on_message(
@@ -33,9 +34,9 @@ async def _ds(c, m):
     """
     chat_id = m.chat.id
     cmd = m.command
-    ds = cmd[0].lower()[2:3]
-    task = get_task(ds)
-    if chat_id in task:
+    ds = int(cmd[0].lower()[2:3] or 0)
+    task_store = get_task_store(ds)
+    if chat_id in task_store:
         return await eor(m, f"Please wait until previous •ds{ds}• is finished or cancel it.", time=6)
     await m.delete()
     try:
@@ -52,36 +53,22 @@ async def _ds(c, m):
         message = " ".join(m.text.markdown.split(" ")[3:])
         message_id = 0
         is_text = True
-    delay = 2 if int(delay) < 2 else delay
-    task.add(chat_id)
-    for _ in range(count):
-        if chat_id not in get_task(ds):
-            break
-        try:
-            await asyncio.sleep(1)
-            result = await send_message(
-                c,
-                message,
-                chat_id,
-                message_id,
-                delay,
-                is_forward,
-            )
-            if not is_text:
-                message_id = getattr(result, "id", message_id)
-        except RPCError:
-            pass
-        except Exception as err:
-            c.log.error(err)
-            c.log.exception(err)
-            if chat_id not in Var.ERROR_RETRY:
-                Var.ERROR_RETRY.update({chat_id: 1})
-            else:
-                Var.ERROR_RETRY.update({chat_id: Var.ERROR_RETRY[chat_id] + 1})
-            if chat_id in Var.ERROR_RETRY and Var.ERROR_RETRY[chat_id] > 3:
-                Var.ERROR_RETRY.pop(chat_id)
-                break
-    get_task(ds).discard(chat_id)
+    delay = max(2, delay)
+    task = asyncio.create_task(
+        run_delayspam(
+            c,
+            ds,
+            chat_id,
+            message,
+            message_id,
+            delay,
+            count,
+            is_text,
+            is_forward,
+        )
+    )
+    DS_TASKS[ds][chat_id] = task
+    task.add_done_callback(lambda t, k=chat_id: get_task_store(ds).pop(k, None))
 
 
 @KastaClient.on_message(
@@ -98,11 +85,13 @@ async def _dscancel(_, m):
     Usage: dscancel, ds1cancel
     """
     chat_id = m.chat.id
-    ds = m.command[0].lower()[2:3].replace("c", "")
-    task = get_task(ds)
-    if chat_id not in task:
+    ds = int(m.command[0].lower()[2:3].replace("c", "") or 0)
+    task_store = get_task_store(ds)
+    if chat_id not in task_store:
         return await eor(m, f"No running •ds{ds}• in current chat.", time=6)
-    task.discard(chat_id)
+    task = task_store.pop(chat_id)
+    if not task.done():
+        task.cancel()
     await eor(m, f"`canceled ds{ds} in current chat`", time=6)
 
 
@@ -119,8 +108,12 @@ async def _dsstop(_, m):
     Stop ds - ds9 in all chats
     usage: dsstop, ds1stop
     """
-    ds = m.command[0].lower()[2:3].replace("s", "")
-    get_task(ds).clear()
+    ds = int(m.command[0].lower()[2:3].replace("s", "") or 0)
+    task_store = get_task_store(ds)
+    for task in list(task_store.values()):
+        if not task.done():
+            task.cancel()
+    task_store.clear()
     await eor(m, f"`stopped ds{ds} in all chats`", time=0)
 
 
@@ -137,9 +130,52 @@ async def _dsclear(_, m):
     Clear and stop all ds
     usage: dsclear
     """
-    for task in Var.DS_TASKS.values():
-        task.clear()
+    for store in DS_TASKS.values():
+        for task in list(store.values()):
+            if not task.done():
+                task.cancel()
+        store.clear()
     await eor(m, "`clear all ds*`", time=0)
+
+
+async def run_delayspam(
+    client: KastaClient,
+    ds: int,
+    chat_id: int,
+    message: Message | str,
+    message_id: int,
+    delay: int,
+    count: int,
+    is_text: bool,
+    is_forward: bool,
+) -> None:
+    for _ in range(count):
+        if chat_id not in get_task_store(ds):
+            break
+        try:
+            await asyncio.sleep(1)
+            result = await send_message(
+                client,
+                message,
+                chat_id,
+                message_id,
+                delay,
+                is_forward,
+            )
+            if not is_text:
+                message_id = getattr(result, "id", message_id)
+        except errors.RPCError:
+            pass
+        except Exception as err:
+            client.log.error(err)
+            client.log.exception(err)
+            if chat_id not in Var.ERROR_RETRY:
+                Var.ERROR_RETRY.update({chat_id: 1})
+            else:
+                Var.ERROR_RETRY.update({chat_id: Var.ERROR_RETRY[chat_id] + 1})
+            if chat_id in Var.ERROR_RETRY and Var.ERROR_RETRY[chat_id] > 3:
+                Var.ERROR_RETRY.pop(chat_id)
+                break
 
 
 async def send_message(

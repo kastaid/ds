@@ -34,7 +34,6 @@ class Var:
     WORKERS: int = int(getenv("WORKERS", str(WORKERS)).strip())
     HANDLER: str = getenv("HANDLER", "").strip()
     IS_STARTUP: bool = False
-    DS_TASKS: ClassVar[dict[int, set[int]]] = {i: set() for i in range(10)}
     ERROR_RETRY: ClassVar[dict[int, int]] = {}
 
 
