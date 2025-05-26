@@ -12,6 +12,7 @@ COPY requirements.txt /tmp/
 
 RUN set -eux && \
     apk add --no-cache \
+        tini \
         musl-locales \
         tzdata \
         gcc \
@@ -36,4 +37,5 @@ RUN set -eux && \
 
 COPY . .
 
+ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["python", "-m", "ds"]
