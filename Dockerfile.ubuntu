@@ -27,7 +27,7 @@ RUN set -eux && \
         locales \
         build-essential && \
     apt-get -qqy clean && \
-    rm -rf -- /var/lib/apt/lists/* /var/cache/apt/archives/* /etc/apt/sources.list.d/* /usr/share/man/* /usr/share/doc/* /tmp/* /var/tmp/*
+    rm -rf -- /var/lib/apt/lists/* /var/cache/apt/archives/* /usr/share/man/* /usr/share/doc/* /tmp/* /var/tmp/*
 
 COPY . .
 
