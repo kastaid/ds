@@ -8,7 +8,7 @@ __pycache__/
 .github
 .venv
 .dockerignore
-Dockerfile
+Dockerfile*
 *compose.yml
 LICENSE
 README.md
