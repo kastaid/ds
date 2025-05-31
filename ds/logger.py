@@ -10,7 +10,6 @@ import sys
 from datetime import date
 from loguru import logger as LOG
 from . import PROJECT
-from .config import Var
 
 LOG.remove(0)
 LOG.add(
@@ -20,8 +19,6 @@ LOG.add(
     ),
     format="{time:YY/MM/DD HH:mm:ss} | {level: <8} | {name: ^15} | {function: ^15} | {line: >3} : {message}",
     rotation="1 MB",
-    backtrace=False,
-    diagnose=not Var.DEV_MODE,
     enqueue=True,
 )
 LOG.add(
@@ -29,8 +26,6 @@ LOG.add(
     format="{time:YY/MM/DD HH:mm:ss} | {level} | {name}:{function}:{line} | {message}",
     level="INFO",
     colorize=False,
-    backtrace=False,
-    diagnose=not Var.DEV_MODE,
 )
 
 
