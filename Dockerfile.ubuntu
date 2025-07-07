@@ -1,10 +1,8 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.12-slim-bookworm AS builder
 
-ENV TZ=Asia/Jakarta \
-    DEBIAN_FRONTEND=noninteractive \
+ENV DEBIAN_FRONTEND=noninteractive \
     VIRTUAL_ENV=/opt/venv \
-    PATH=/opt/venv/bin:/app/bin:$PATH
-ARG LANG=en_US
+    PATH=/opt/venv/bin:$PATH
 
 WORKDIR /app
 COPY requirements.txt /tmp/
@@ -12,23 +10,37 @@ COPY requirements.txt /tmp/
 RUN set -eux && \
     apt-get -qqy update && \
     apt-get -qqy install --no-install-recommends \
+        build-essential && \
+    python -m venv $VIRTUAL_ENV && \
+    $VIRTUAL_ENV/bin/pip install --upgrade pip && \
+    $VIRTUAL_ENV/bin/pip install --no-cache-dir --disable-pip-version-check --default-timeout=100 -r /tmp/requirements.txt
+
+FROM python:3.12-slim-bookworm
+
+ENV TZ=Asia/Jakarta \
+    DEBIAN_FRONTEND=noninteractive \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:$PATH
+ARG LANG=en_US
+
+WORKDIR /app
+
+RUN set -eux && \
+    apt-get -qqy update && \
+    apt-get -qqy install --no-install-recommends \
         tini \
         locales \
-        tzdata \
-        build-essential && \
+        tzdata && \
     localedef --quiet -i ${LANG} -c -f UTF-8 -A /usr/share/locale/locale.alias ${LANG}.UTF-8 && \
     cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
     echo "${TZ}" > /etc/timezone && \
     dpkg-reconfigure --force -f noninteractive tzdata >/dev/null 2>&1 && \
-    python -m venv $VIRTUAL_ENV && \
-    $VIRTUAL_ENV/bin/pip install --upgrade pip && \
-    $VIRTUAL_ENV/bin/pip install --no-cache-dir --disable-pip-version-check --default-timeout=100 -r /tmp/requirements.txt && \
     apt-get -qqy purge --auto-remove \
-        locales \
-        build-essential && \
+        locales && \
     apt-get -qqy clean && \
     rm -rf -- /var/lib/apt/lists/* /var/cache/apt/archives/* /usr/share/man/* /usr/share/doc/* /tmp/* /var/tmp/*
 
+COPY --from=builder /opt/venv /opt/venv
 COPY . .
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
