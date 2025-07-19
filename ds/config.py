@@ -10,7 +10,7 @@ from typing import ClassVar
 from dotenv import load_dotenv, find_dotenv
 from . import WORKERS
 
-load_dotenv(find_dotenv(".env"))
+load_dotenv(find_dotenv())
 
 
 def tobool(val: str) -> int | None:
