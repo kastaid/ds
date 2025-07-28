@@ -7,7 +7,9 @@
 
 from os import getenv
 from typing import ClassVar
-from dotenv import load_dotenv, find_dotenv
+
+from dotenv import find_dotenv, load_dotenv
+
 from . import WORKERS
 
 load_dotenv(find_dotenv())

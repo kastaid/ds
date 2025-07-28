@@ -11,9 +11,11 @@ from collections.abc import Callable
 from functools import wraps
 from random import randrange
 from typing import Any, T
+
 import pyrogram.client
 import pyrogram.errors
 import pyrogram.types.messages_and_media.message
+
 from .logger import LOG
 
 

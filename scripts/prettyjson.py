@@ -6,6 +6,7 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 from json import dump, load
+
 from . import Root
 
 EXCLUDE = (".mypy_cache", "db")
