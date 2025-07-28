@@ -8,7 +8,9 @@
 import logging
 import sys
 from datetime import date
+
 from loguru import logger as LOG
+
 from . import PROJECT
 
 LOG.remove(0)

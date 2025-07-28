@@ -9,6 +9,7 @@ from os import cpu_count
 from pathlib import Path
 from shutil import rmtree
 from time import time
+
 from version import __version__  # noqa
 
 PROJECT = "ds"

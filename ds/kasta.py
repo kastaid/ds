@@ -7,14 +7,16 @@
 
 import asyncio
 import sys
-from platform import version, machine
+from platform import machine, version
 from random import randrange
 from time import time
+
 from pyrogram.client import Client as RawClient
 from pyrogram.enums import ParseMode
 from pyrogram.errors import RPCError
-from pyrogram.types import User, CallbackQuery
-from . import PROJECT, StartTime, Root
+from pyrogram.types import CallbackQuery, User
+
+from . import PROJECT, Root, StartTime
 from .config import Var
 from .helpers import time_formatter
 
