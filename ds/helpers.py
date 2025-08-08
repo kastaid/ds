@@ -11,19 +11,33 @@ import sys
 from . import PROJECT, Root
 
 
-def time_formatter(ms: int | float) -> str:
-    minutes, seconds = divmod(int(ms / 1000), 60)
-    hours, minutes = divmod(minutes, 60)
-    days, hours = divmod(hours, 24)
-    weeks, days = divmod(days, 7)
-    time_units = (
-        f"{weeks}w, " if weeks else "",
-        f"{days}d, " if days else "",
-        f"{hours}h, " if hours else "",
-        f"{minutes}m, " if minutes else "",
-        f"{seconds}s, " if seconds else "",
-    )
-    return "".join(time_units)[:-2] or "0s"
+def time_formatter(
+    ms: int | float,
+    readable: bool = False,
+) -> str:
+    m, s = divmod(int(ms / 1000), 60)
+    h, m = divmod(m, 60)
+    d, h = divmod(h, 24)
+    w, d = divmod(d, 7)
+    if readable:
+        units = [
+            (w, "week"),
+            (d, "day"),
+            (h, "hour"),
+            (m, "min"),
+            (s, "sec"),
+        ]
+        parts = [f"{val}{unit}" for val, unit in units if val]
+        return ", ".join(parts) or "0sec"
+    units = [
+        (w, "w"),
+        (d, "d"),
+        (h, "h"),
+        (m, "m"),
+        (s, "s"),
+    ]
+    parts = [f"{val}{unit}" for val, unit in units if val]
+    return ", ".join(parts) or "0s"
 
 
 def get_terminal_logs() -> list[str]:
