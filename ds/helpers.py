@@ -47,15 +47,6 @@ def get_terminal_logs() -> list[str]:
 def restart(update: bool = False) -> None:
     if update:
         os.system("clear")
-    try:
-        import psutil
-
-        proc = psutil.Process(os.getpid())
-        for p in proc.open_files() + proc.connections():
-            os.close(p.fd)
-    except BaseException:
-        pass
-    if update:
         reqs = Root / "requirements.txt"
         os.system(f"{sys.executable} -m pip install --disable-pip-version-check --default-timeout=100 -U -r {reqs}")
     os.execl(sys.executable, sys.executable, "-m", PROJECT)
