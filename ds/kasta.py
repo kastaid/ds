@@ -66,12 +66,20 @@ class KastaClient(RawClient):
         if self.me.username:
             user_details += f"\nUsername: @{self.me.username}"
         self.log.info(user_details)
-        await self.follow_us()
+        await self.__follow_us
         done = time_formatter((time() - StartTime) * 1000)
         self.log.success(f">> 🔥 USERBOT RUNNING IN {done} !!")
         Var.IS_STARTUP = True
 
-    async def follow_us(self) -> None:
+    async def stop(self, **_) -> None:
+        try:
+            await super().stop()
+            self.log.info("Stopped Client.")
+        except BaseException:
+            pass
+
+    @property
+    async def __follow_us(self) -> None:
         try:
             await self.join_chat(-1001174631272)
             await asyncio.sleep(3)
@@ -101,10 +109,3 @@ class KastaClient(RawClient):
         if not deleted and is_callback:
             await self.answer(event)
         return deleted
-
-    async def stop(self, **_) -> None:
-        try:
-            await super().stop()
-            self.log.info("Stopped Client.")
-        except BaseException:
-            pass
