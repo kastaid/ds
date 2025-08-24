@@ -28,10 +28,10 @@ if __name__ == "__main__":
     ):
         pass
     except ImportError as err:
-        LOG.exception(f"[MAIN_MODULE_IMPORT] : {err}")
+        LOG.exception(f"[MAIN_MODULE_IMPORT]: {err}")
         sys.exit(1)
     except Exception as err:
-        LOG.exception(f"[MAIN_ERROR] : {err}")
+        LOG.exception(f"[MAIN_ERROR]: {err}")
     finally:
         LOG.warning("[MAIN] - Stopped...")
         sys.exit(0)
