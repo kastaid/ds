@@ -22,16 +22,11 @@ async def main() -> None:
 if __name__ == "__main__":
     try:
         uvloop.run(main())
-    except (
-        KeyboardInterrupt,
-        SystemExit,
-    ):
-        pass
-    except ImportError as err:
-        LOG.exception(f"[MAIN_MODULE_IMPORT]: {err}")
-        sys.exit(1)
+    except (KeyboardInterrupt, SystemExit):
+        LOG.warning("[MAIN_ERROR] - Manual stop signal received.")
+        sys.exit(0)
     except Exception as err:
         LOG.exception(f"[MAIN_ERROR]: {err}")
+        sys.exit(1)
     finally:
         LOG.warning("[MAIN] - Stopped...")
-        sys.exit(0)
