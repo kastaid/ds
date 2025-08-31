@@ -23,7 +23,7 @@ if __name__ == "__main__":
     try:
         uvloop.run(main())
     except (KeyboardInterrupt, SystemExit):
-        LOG.warning("[MAIN_ERROR] - Manual stop signal received.")
+        LOG.warning("[MAIN] - Manual stop signal received.")
         sys.exit(0)
     except Exception as err:
         LOG.exception(f"[MAIN_ERROR]: {err}")
