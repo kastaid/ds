@@ -51,7 +51,8 @@ class KastaClient(RawClient):
     async def start(self) -> None:
         try:
             self.log.info("Starting Userbot Client...")
-            await asyncio.sleep(randrange(3, 6))
+            delay = randrange(3, 6) if Var.DEV_MODE else randrange(1, 3)
+            await asyncio.sleep(delay)
             await super().start()
         except Exception as err:
             self.log.exception(err)
