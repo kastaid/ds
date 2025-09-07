@@ -17,14 +17,15 @@ StartTime = time()
 Root: Path = Path(__file__).parent.parent
 WORKERS = min(32, (cpu_count() or 1) + 4)
 
-for d in ("logs/",):
+DIRS = ("logs/",)
+for d in DIRS:
     if not (Root / d).exists():
         (Root / d).mkdir(parents=True, exist_ok=True)
     else:
-        for _ in (Root / d).rglob("*"):
-            if _.is_dir():
-                rmtree(_, ignore_errors=True)
+        for i in (Root / d).rglob("*"):
+            if i.is_dir():
+                rmtree(i, ignore_errors=True)
             else:
-                _.unlink(missing_ok=True)
+                i.unlink(missing_ok=True)
 
 del cpu_count, Path, rmtree, time
