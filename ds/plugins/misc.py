@@ -10,7 +10,6 @@ from time import monotonic, time
 
 from pyrogram import filters
 from pyrogram.errors import RPCError, UsersTooMuch
-from pyrogram.raw.functions import Ping
 from pyrogram.raw.functions.messages import ReadMentions, ReadReactions
 
 from ds import StartTime
@@ -33,15 +32,24 @@ async def _ping(c, m):
     Usage: ping
     """
     start = monotonic()
-    try:
-        await c.invoke(Ping(ping_id=0))
-        msg = m
-    except RPCError:
-        msg = await m.edit("Ping !")
-    end = monotonic()
-    await msg.edit(
-        f"🏓 Pong !!\n<b>Speed</b> – {end - start:.3f}s\n<b>Uptime</b> – {time_formatter((time() - StartTime) * 1000)}"
+    msg = await m.reply(
+        "Ping !",
+        quote=False,
     )
+    text = "🏓 Pong !!\n"
+    text += f"Speed – {monotonic() - start:.3f}s\n"
+    text += f"Uptime – {time_formatter((time() - StartTime) * 1000)}"
+    try:
+        await msg.edit(text)
+    except BaseException:
+        try:
+            await msg.delete()
+        except BaseException:
+            pass
+        await m.reply(
+            text,
+            quote=False,
+        )
 
 
 @KastaClient.on_message(
