@@ -66,7 +66,7 @@ async def _restart(_, m):
     Usage: restart
     """
     await m.edit("Restarting Userbot...")
-    restart(update=True)
+    restart(update=False)
 
 
 @KastaClient.on_message(
