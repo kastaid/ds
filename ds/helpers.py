@@ -48,5 +48,5 @@ def restart(update: bool = False) -> None:
     if update:
         os.system("clear")
         reqs = Root / "requirements.txt"
-        os.system(f"{sys.executable} -m pip install --disable-pip-version-check --default-timeout=100 -U -r {reqs}")
+        os.system(f"{sys.executable} -m pip install --disable-pip-version-check --default-timeout=100 -r {reqs}")
     os.execl(sys.executable, sys.executable, "-m", PROJECT)
