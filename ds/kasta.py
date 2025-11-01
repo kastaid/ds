@@ -6,9 +6,9 @@
 # < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
 
 import asyncio
+import random
 import sys
 from platform import machine, version
-from random import randrange
 from time import time
 
 from pyrogram.client import Client as RawClient
@@ -51,7 +51,7 @@ class KastaClient(RawClient):
     async def start(self) -> None:
         try:
             self.log.info("Starting Userbot Client...")
-            delay = randrange(3, 6) if Var.DEV_MODE else randrange(1, 3)
+            delay = random.uniform(3, 6) if Var.DEV_MODE else random.uniform(1, 3)
             await asyncio.sleep(delay)
             await super().start()
         except Exception as err:
