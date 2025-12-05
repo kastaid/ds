@@ -67,7 +67,7 @@ class KastaClient(RawClient):
         if self.me.username:
             user_details += f"\nUsername: @{self.me.username}"
         self.log.info(user_details)
-        await self.__follow_us
+        await self.__follow_us()
         done = time_formatter((time() - StartTime) * 1000)
         self.log.success(f">> 🔥 USERBOT RUNNING IN {done} !!")
         Var.IS_STARTUP = True
@@ -79,7 +79,6 @@ class KastaClient(RawClient):
         except BaseException:
             pass
 
-    @property
     async def __follow_us(self) -> None:
         try:
             await self.join_chat(-1001174631272)
