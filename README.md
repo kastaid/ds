@@ -1,5 +1,5 @@
 # ds - delayspam
-> Pyrogram **userbot** for delay spam a message with multi chats.
+> Pyrogram (pyrofork) userbot for delay spam in multiple chats (ds-ds9)
 
 <p align="center">
     <a href="https://github.com/kastaid/ds/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/kastaid/ds/ci.yml?branch=main&logo=github&label=CI" /></a>
