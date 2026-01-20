@@ -10,6 +10,7 @@ __pycache__/
 .dockerignore
 Dockerfile*
 *compose.yml
+docs
 LICENSE
 README.md
 requirements-dev.txt
