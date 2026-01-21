@@ -1,9 +1,7 @@
-# ds < https://t.me/kastaid >
 # Copyright (C) 2023-present kastaid
-#
-# This file is a part of < https://github.com/kastaid/ds/ >
-# Please read the MIT License in
-# < https://github.com/kastaid/ds/blob/main/LICENSE/ >.
+# This file is part of https://github.com/kastaid/ds
+# Please read the MIT License at
+# https://github.com/kastaid/ds/blob/main/LICENSE
 
 from os import getenv
 from typing import ClassVar
