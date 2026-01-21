@@ -1,3 +1,8 @@
+# Copyright (C) 2023-present kastaid
+# This file is part of https://github.com/kastaid/ds
+# Please read the MIT License at
+# https://github.com/kastaid/ds/blob/main/LICENSE
+
 FROM python:3.12-alpine AS builder
 
 ENV VIRTUAL_ENV=/opt/venv \
