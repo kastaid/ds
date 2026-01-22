@@ -1,7 +1,6 @@
 # Copyright (C) 2023-present kastaid
-# This file is part of https://github.com/kastaid/ds
-# Please read the MIT License at
-# https://github.com/kastaid/ds/blob/main/LICENSE
+# https://github.com/kastaid/ds
+# MIT License
 
 from json import dump, load
 
