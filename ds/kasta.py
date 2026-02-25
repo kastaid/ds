@@ -9,6 +9,7 @@ from platform import machine, version
 from time import time
 
 from pyrogram.client import Client as RawClient
+from pyrogram.connection.transport import TCPFull
 from pyrogram.enums import ParseMode
 from pyrogram.errors import RPCError
 from pyrogram.types import CallbackQuery, User
@@ -30,12 +31,10 @@ class KastaClient(RawClient):
             workdir=Root,
             parse_mode=ParseMode.HTML,
             system_version=" ".join((version(), machine())),
-            plugins={
-                "root": "".join((PROJECT, ".plugins")),
-                "exclude": [],
-            },
+            plugins={"root": "".join((PROJECT, ".plugins")), "exclude": []},
             sleep_threshold=15,
         )
+        self.protocol_factory = TCPFull
 
     async def get_me(
         self,
