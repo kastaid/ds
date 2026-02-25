@@ -11,7 +11,7 @@ from version import __version__  # noqa
 
 PROJECT = "ds"
 StartTime = time()
-Root: Path = Path(__file__).parent.parent
+Root = Path(__file__).parent.parent
 WORKERS = min(32, (cpu_count() or 1) + 4)
 
 DIRS = ("logs/",)

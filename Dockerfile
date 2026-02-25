@@ -2,36 +2,24 @@
 # https://github.com/kastaid/ds
 # MIT License
 
-FROM python:3.12-alpine AS builder
-
+FROM python:3.12-slim-trixie AS builder
 ENV VIRTUAL_ENV=/opt/venv \
-    PATH=/opt/venv/bin:$PATH
-
+    PATH=/opt/venv/bin:/root/.local/bin:$PATH
 WORKDIR /app
 COPY requirements.txt /tmp/
-
 RUN set -eux && \
-    apk add --no-cache \
-        build-base \
-        libffi-dev \
-        cargo && \
+    apt-get -qqy update && \
+    apt-get -qqy install --no-install-recommends \
+        build-essential curl && \
+    curl -LsSf https://astral.sh/uv/install.sh | sh && \
     python -m venv $VIRTUAL_ENV && \
-    $VIRTUAL_ENV/bin/pip install --upgrade pip && \
-    $VIRTUAL_ENV/bin/pip install --no-cache-dir --disable-pip-version-check --default-timeout=100 -r /tmp/requirements.txt
+    uv pip install --python $VIRTUAL_ENV/bin/python -r /tmp/requirements.txt
 
-FROM python:3.12-alpine
-
+FROM python:3.12-slim-trixie
 ENV PATH=/opt/venv/bin:$PATH
-
 WORKDIR /app
-
-RUN set -eux && \
-    apk add --no-cache \
-        tini && \
-    rm -rf -- /var/cache/apk/* /usr/share/man/* /usr/share/doc/* /tmp/* /var/tmp/*
 
 COPY --from=builder /opt/venv /opt/venv
 COPY . .
 
-ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["python", "-m", "ds"]

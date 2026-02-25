@@ -37,8 +37,8 @@ Thank you for trusting and using this userbot!
 
 ## Requirements
 
-- Python 3.11.x
-- Linux (recommended: Debian/Ubuntu)
+- Python 3.12.x
+- Linux (recommended: latest Debian/Ubuntu)
 - Telegram `API_ID` and `API_HASH` from [API development tools](https://my.telegram.org)
 
 ## Quick Start
