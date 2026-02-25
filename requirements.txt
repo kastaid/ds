@@ -1,6 +1,6 @@
 pyrofork==2.3.69
-TgCrypto==1.2.5
+TgCrypto-pyrofork==1.2.8
 
 loguru==0.7.3
 python-dotenv==1.2.1
-uvloop==0.20.0
+uvloop==0.22.1

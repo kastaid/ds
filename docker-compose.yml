@@ -1,8 +1,8 @@
 services:
   ds:
-    build:
-      context: .
+    build: .
     image: ds:latest
+    init: true
     restart: unless-stopped
     volumes:
       - ./:/app
