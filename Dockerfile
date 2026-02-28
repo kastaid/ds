@@ -2,24 +2,24 @@
 # https://github.com/kastaid/ds
 # MIT License
 
-FROM python:3.12-slim-trixie AS builder
-ENV VIRTUAL_ENV=/opt/venv \
+FROM python:3.12-slim-bookworm
+ENV TERM=xterm \
+    VIRTUAL_ENV=/opt/venv \
     PATH=/opt/venv/bin:/root/.local/bin:$PATH
 WORKDIR /app
-COPY requirements.txt /tmp/
+COPY requirements.txt .
 RUN set -eux && \
     apt-get -qqy update && \
     apt-get -qqy install --no-install-recommends \
         build-essential curl && \
     curl -LsSf https://astral.sh/uv/install.sh | sh && \
     python -m venv $VIRTUAL_ENV && \
-    uv pip install --python $VIRTUAL_ENV/bin/python -r /tmp/requirements.txt
+    uv pip install --python $VIRTUAL_ENV/bin/python -r requirements.txt && \
+    apt-get -qqy purge \
+        build-essential curl && \
+    apt-get -qqy autoremove && \
+    apt-get clean
 
-FROM python:3.12-slim-trixie
-ENV PATH=/opt/venv/bin:$PATH
-WORKDIR /app
-
-COPY --from=builder /opt/venv /opt/venv
 COPY . .
 
 CMD ["python", "-m", "ds"]

@@ -2,7 +2,6 @@
 # https://github.com/kastaid/ds
 # MIT License
 
-from os import cpu_count
 from pathlib import Path
 from shutil import rmtree
 from time import time
@@ -12,7 +11,7 @@ from version import __version__  # noqa
 PROJECT = "ds"
 StartTime = time()
 Root = Path(__file__).parent.parent
-WORKERS = min(32, (cpu_count() or 1) + 4)
+WORKERS = 3
 
 DIRS = ("logs/",)
 for d in DIRS:
@@ -25,4 +24,4 @@ for d in DIRS:
             else:
                 i.unlink(missing_ok=True)
 
-del cpu_count, Path, rmtree, time
+del Path, rmtree, time
