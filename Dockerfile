@@ -12,7 +12,7 @@ COPY requirements.txt .
 RUN set -eux && \
     apt-get -qqy update && \
     apt-get -qqy install --no-install-recommends \
-        build-essential curl && \
+        curl && \
     curl -LsSf https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/uv-installer.sh | sh && \
     python -m venv $VIRTUAL_ENV && \
     uv pip install --python $VIRTUAL_ENV/bin/python -r requirements.txt && \
