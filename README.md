@@ -70,7 +70,7 @@ Deploy using Docker Compose for easy containerized deployment.
 
 ```sh
 git pull && \
-  docker compose up --detach --build --force-recreate && \
+  docker compose up -d --build && \
   docker compose logs -f
 ```
 
