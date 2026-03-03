@@ -3,6 +3,7 @@
 # MIT License
 
 import os
+import shutil
 import sys
 
 from . import PROJECT, Root
@@ -43,9 +44,11 @@ def get_terminal_logs() -> list[str]:
 
 def restart(update: bool = False) -> None:
     if update:
-        os.system("clear")
         reqs = Root / "requirements.txt"
-        os.system(
-            f"{sys.executable} -m pip install --prefer-binary --disable-pip-version-check --default-timeout=100 -r {reqs}"
-        )
+        if shutil.which("uv"):
+            os.system(f"uv pip install -r {reqs}")
+        else:
+            os.system(
+                f"{sys.executable} -m pip install --prefer-binary --disable-pip-version-check --default-timeout=100 -r {reqs}"
+            )
     os.execl(sys.executable, sys.executable, "-m", PROJECT)
