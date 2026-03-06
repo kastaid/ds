@@ -67,7 +67,7 @@ async def _ds(c, m):
         )
     )
     DS_TASKS[ds][chat_id] = task
-    task.add_done_callback(lambda t, k=chat_id: get_task_store(ds).pop(k, None))
+    task.add_done_callback(lambda _, k=chat_id: get_task_store(ds).pop(k, None))
 
 
 @KastaClient.on_message(
@@ -182,7 +182,7 @@ async def send_message(
     message: str | Message,
     chat_id: int,
     message_id: int,
-    delay: int | float,
+    delay: float,
     is_forward: bool,
 ) -> Message:
     if isinstance(message, str):
@@ -215,7 +215,7 @@ async def send_message(
 async def eor(
     message: Message,
     text: str,
-    time: int | float,
+    time: float,
 ) -> Message | bool:
     try:
         result = await message.edit(

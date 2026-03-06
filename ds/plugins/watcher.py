@@ -9,6 +9,6 @@ from ds.kasta import KastaClient
 
 
 @KastaClient.on_message(filters.me, group=-100)
-async def _watcher(_, m):  # noqa: RUF029
+async def _watcher(_, m):
     if not Var.IS_STARTUP:
         m.stop_propagation()
