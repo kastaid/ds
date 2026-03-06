@@ -10,7 +10,7 @@ from . import PROJECT, Root
 
 
 def time_formatter(
-    ms: int | float,
+    ms: float,
     readable: bool = False,
 ) -> str:
     m, s = divmod(int(ms / 1000), 60)

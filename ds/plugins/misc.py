@@ -23,7 +23,7 @@ from ds.kasta import KastaClient
     & filters.me
     & ~filters.forwarded
 )
-async def _ping(c, m):
+async def _ping(_, m):
     """
     Ping Telegram server
     Usage: ping
