@@ -4,6 +4,7 @@
 
 import os
 import shutil
+import subprocess
 import sys
 
 from . import PROJECT, Root
@@ -44,11 +45,31 @@ def get_terminal_logs() -> list[str]:
 
 def restart(update: bool = False) -> None:
     if update:
-        reqs = Root / "requirements.txt"
+        reqs = str(Root / "requirements.txt")
         if shutil.which("uv"):
-            os.system(f"uv pip install -r {reqs}")
+            subprocess.run(
+                [
+                    "uv",
+                    "pip",
+                    "install",
+                    "-r",
+                    reqs,
+                ],
+                check=True,
+            )
         else:
-            os.system(
-                f"{sys.executable} -m pip install --prefer-binary --disable-pip-version-check --default-timeout=100 -r {reqs}"
+            subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "pip",
+                    "install",
+                    "--prefer-binary",
+                    "--disable-pip-version-check",
+                    "--default-timeout=100",
+                    "-r",
+                    reqs,
+                ],
+                check=True,
             )
     os.execl(sys.executable, sys.executable, "-m", PROJECT)
