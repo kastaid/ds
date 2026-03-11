@@ -7,11 +7,9 @@
 ![Version](https://img.shields.io/github/manifest-json/v/kastaid/ds?label=Version)
 
 > [!WARNING]
-> **Your Telegram account may get banned** if this userbot is misused.
+> Your Telegram account may get banned if this userbot is misused. We are not responsible for any spam, violations, or account restrictions.
 >
-> **We are not responsible** for any spam, violations, or account restrictions.
->
-> **Use it at your own risk** and review the [Telegram API Terms](https://core.telegram.org/api/terms).
+> Use it at your own risk and review the [Telegram API Terms](https://core.telegram.org/api/terms).
 
 ## Table of Contents
 
