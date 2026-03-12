@@ -35,7 +35,7 @@ async def _ping(_, m):
     )
     text = "🏓 Pong !!\n"
     text += f"Speed – {monotonic() - start:.3f}s\n"
-    text += f"Uptime – {time_formatter((time() - StartTime) * 1000)}"
+    text += f"Uptime – {time_formatter(time() - StartTime)}"
     try:
         await msg.edit(text)
     except BaseException:
