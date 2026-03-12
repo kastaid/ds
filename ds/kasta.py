@@ -64,7 +64,7 @@ class KastaClient(RawClient):
             user_details += f"\nUsername: @{self.me.username}"
         self.log.info(user_details)
         await self.__follow_us()
-        done = time_formatter((time() - StartTime) * 1000)
+        done = time_formatter(time() - StartTime)
         self.log.success(f">> 🔥 USERBOT RUNNING IN {done} !!")
         Var.IS_STARTUP = True
 

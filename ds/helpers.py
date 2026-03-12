@@ -11,32 +11,47 @@ from . import PROJECT, Root
 
 
 def time_formatter(
-    ms: float,
+    dur: float,
     readable: bool = False,
 ) -> str:
-    m, s = divmod(int(ms / 1000), 60)
-    h, m = divmod(m, 60)
-    d, h = divmod(h, 24)
-    w, d = divmod(d, 7)
+    if dur > 1e10:
+        dur //= 1000
+    total = int(dur)
+    sec = total % 60
+    total //= 60
+    mins = total % 60
+    total //= 60
+    hour = total % 24
+    total //= 24
+    day = total % 7
+    week = total // 7
+    if not (week or day or hour or mins or sec):
+        return "0sec" if readable else "0s"
     if readable:
-        units = [
-            (w, "week"),
-            (d, "day"),
-            (h, "hour"),
-            (m, "min"),
-            (s, "sec"),
-        ]
-        parts = [f"{val}{unit}" for val, unit in units if val]
-        return ", ".join(parts) or "0sec"
-    units = [
-        (w, "w"),
-        (d, "d"),
-        (h, "h"),
-        (m, "m"),
-        (s, "s"),
-    ]
-    parts = [f"{val}{unit}" for val, unit in units if val]
-    return ", ".join(parts) or "0s"
+        parts = []
+        if week:
+            parts.append(f"{week}week")
+        if day:
+            parts.append(f"{day}day")
+        if hour:
+            parts.append(f"{hour}hour")
+        if mins:
+            parts.append(f"{mins}min")
+        if sec:
+            parts.append(f"{sec}sec")
+        return ", ".join(parts)
+    parts = []
+    if week:
+        parts.append(f"{week}w")
+    if day:
+        parts.append(f"{day}d")
+    if hour:
+        parts.append(f"{hour}h")
+    if mins:
+        parts.append(f"{mins}m")
+    if sec:
+        parts.append(f"{sec}s")
+    return ", ".join(parts)
 
 
 def get_terminal_logs() -> list[str]:
