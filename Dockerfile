@@ -3,7 +3,7 @@
 # MIT License
 
 FROM python:3.13-slim-bookworm
-COPY --from=ghcr.io/astral-sh/uv:0.10.9 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.10.10 /uv /uvx /bin/
 ENV TERM=xterm \
     PATH=/opt/venv/bin:$PATH \
     UV_LINK_MODE=copy \
