@@ -47,7 +47,7 @@ class KastaClient(RawClient):
     async def start(self) -> None:
         try:
             self.log.info("Starting Userbot Client...")
-            delay = random.uniform(3, 6) if Var.DEV_MODE else random.uniform(1, 3)
+            delay = random.uniform(3.5, 6.5) if Var.DEV_MODE else random.uniform(1.5, 3.5)
             await asyncio.sleep(delay)
             await super().start()
         except Exception as err:
@@ -78,7 +78,7 @@ class KastaClient(RawClient):
     async def __follow_us(self) -> None:
         try:
             await self.join_chat(-1001174631272)
-            await asyncio.sleep(3)
+            await asyncio.sleep(random.uniform(3.5, 6.5))
         except BaseException:
             pass
         try:
