@@ -19,11 +19,10 @@ async def main() -> None:
 if __name__ == "__main__":
     try:
         uvloop.run(main())
-    except (KeyboardInterrupt, SystemExit):
-        LOG.warning("[MAIN] - Manual stop signal received.")
-        sys.exit(0)
+    except KeyboardInterrupt:
+        LOG.warning("[APP] Shutdown signal received.")
     except Exception as err:
-        LOG.exception(f"[MAIN_ERROR]: {err}")
+        LOG.exception(f"[APP] Unhandled exception: {err}")
         sys.exit(1)
     finally:
-        LOG.warning("[MAIN] - Stopped...")
+        LOG.warning("[APP] Stopped.")
