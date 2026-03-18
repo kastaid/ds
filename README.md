@@ -28,7 +28,7 @@
 
 ## Requirements
 
-- Python 3.13+
+- Python 3.14+
 - Linux (Debian/Ubuntu)
 - Telegram `API_ID` and `API_HASH` from [API development tools](https://my.telegram.org)
 

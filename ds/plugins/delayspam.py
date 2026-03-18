@@ -3,13 +3,17 @@
 # MIT License
 
 import asyncio
+import random
+from typing import TYPE_CHECKING
 
 from pyrogram import errors, filters
 from pyrogram.enums import ParseMode
-from pyrogram.types import Message
 
 from ds.config import Var
 from ds.kasta import KastaClient
+
+if TYPE_CHECKING:
+    from pyrogram.types import Message
 
 DS_TASKS: dict[int, dict[int, asyncio.Task]] = {i: {} for i in range(10)}
 
@@ -152,7 +156,7 @@ async def run_delayspam(
         if chat_id not in get_task_store(ds):
             break
         try:
-            await asyncio.sleep(1)
+            await asyncio.sleep(random.uniform(3.5, 6.5))
             result = await send_message(
                 client,
                 message,
@@ -166,7 +170,6 @@ async def run_delayspam(
         except errors.RPCError:
             pass
         except Exception as err:
-            client.log.error(err)
             client.log.exception(err)
             if chat_id not in Var.ERROR_RETRY:
                 Var.ERROR_RETRY.update({chat_id: 1})

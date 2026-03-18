@@ -4,12 +4,12 @@
 
 from pathlib import Path
 from shutil import rmtree
-from time import time
+from time import monotonic
 
 from version import __version__  # noqa
 
 PROJECT = "ds"
-StartTime = time()
+StartTime = monotonic()
 Root = Path(__file__).parent.parent
 WORKERS = 3
 
@@ -24,4 +24,4 @@ for d in DIRS:
             else:
                 i.unlink(missing_ok=True)
 
-del Path, rmtree, time
+del Path, rmtree, monotonic

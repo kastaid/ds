@@ -3,7 +3,8 @@
 # MIT License
 
 import asyncio
-from time import monotonic, time
+import random
+from time import monotonic
 
 from pyrogram import filters
 from pyrogram.errors import RPCError, UsersTooMuch
@@ -35,14 +36,12 @@ async def _ping(_, m):
     )
     text = "🏓 Pong !!\n"
     text += f"Speed – {monotonic() - start:.3f}s\n"
-    text += f"Uptime – {time_formatter(time() - StartTime)}"
+    text += f"Uptime – {time_formatter(monotonic() - StartTime)}"
     try:
+        await m.delete()
         await msg.edit(text)
     except BaseException:
-        try:
-            await msg.delete()
-        except BaseException:
-            pass
+        await msg.delete()
         await m.reply(
             text,
             quote=False,
@@ -86,7 +85,7 @@ async def _logs(_, m):
             caption=f"Terminal Logs {count}",
             quote=False,
         )
-        await asyncio.sleep(1)
+        await asyncio.sleep(random.uniform(1.5, 3.5))
     await msg.delete()
 
 
@@ -156,7 +155,7 @@ async def _purge(c, m):
             except RPCError:
                 pass
             chunk.clear()
-            await asyncio.sleep(1)
+            await asyncio.sleep(random.uniform(1.5, 3.5))
     if len(chunk) > 0:
         try:
             await c.delete_messages(chat_id, chunk)
@@ -224,14 +223,14 @@ async def _join(c, m):
             state = bool(await c.join_chat(chat_id))
         except UsersTooMuch:
             count += 1
-            await m.edit(rf"🔃 Join retry {count}...")
-            await asyncio.sleep(6)
+            await m.edit(f"🔃 Join retry {count}...")
+            await asyncio.sleep(random.uniform(6.5, 8.5))
             continue
         except BaseException:
             break
         if state:
             break
-    text = rf"✅ Joined as {count}." if state else r"❌ Error"
+    text = f"✅ Joined as {count}." if state else "❌ Error"
     await m.edit(text)
 
 
@@ -259,7 +258,7 @@ async def _leave(c, m):
         state = bool(await c.leave_chat(chat_id, delete=True))
     except BaseException:
         pass
-    text = r"✅ Leaved" if state else r"❌ Error"
+    text = "✅ Leaved" if state else "❌ Error"
     await m.edit(text)
 
 

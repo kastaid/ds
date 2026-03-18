@@ -5,7 +5,7 @@
 import sys
 
 import uvloop
-from pyrogram.sync import compose
+from pyrogram import idle
 
 from .kasta import KastaClient
 from .logger import LOG
@@ -13,7 +13,10 @@ from .patcher import *  # noqa
 
 
 async def main() -> None:
-    await compose([KastaClient()])
+    app = KastaClient()
+    await app.start()
+    await idle()
+    await app.stop()
 
 
 if __name__ == "__main__":

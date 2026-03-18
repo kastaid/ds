@@ -3,25 +3,22 @@
 # MIT License
 
 import asyncio
-import logging
 import random
-from collections.abc import Callable
-from functools import wraps
-from typing import Any, T
+from typing import TYPE_CHECKING, Any
 
 import pyrogram.client
 import pyrogram.errors
 import pyrogram.types.messages_and_media.message
 
-from .logger import LOG
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
-def patch(target: Any):
+def patch[T](target: Any) -> Callable[[type[T]], type[T]]:
     def is_patchable(item: tuple[str, Any]) -> bool:
         return getattr(item[1], "patchable", False)
 
-    @wraps(target)
-    def wrapper(container: type[T]) -> T:
+    def wrapper(container: type[T]) -> type[T]:
         for name, func in filter(is_patchable, container.__dict__.items()):
             old = getattr(target, name, None)
             if old is not None:
@@ -46,10 +43,6 @@ def patchable(is_property: bool = False) -> Callable:
 
 @patch(pyrogram.client.Client)
 class Client:
-    @patchable(True)
-    def log(self) -> logging:
-        return LOG
-
     @patchable()
     async def invoke(self, *args, **kwargs):
         try:
