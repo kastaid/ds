@@ -105,9 +105,9 @@ class KastaClient(RawClient):
         try:
             await self.join_chat(-1001174631272)
             await asyncio.sleep(random.uniform(3.5, 6.5))
-        except BaseException:
+        except Exception:
             pass
         try:
             await self.join_chat(-1001699144606)
-        except BaseException:
+        except Exception:
             pass

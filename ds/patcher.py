@@ -89,5 +89,5 @@ class Message:
     async def delete(self, revoke: bool = True) -> bool:
         try:
             return await self.old_delete(revoke=revoke)
-        except BaseException:
+        except Exception:
             return False

@@ -40,7 +40,7 @@ async def _ping(_, m):
     try:
         await m.delete()
         await msg.edit(text)
-    except BaseException:
+    except Exception:
         await msg.delete()
         await m.reply(
             text,
@@ -226,7 +226,7 @@ async def _join(c, m):
             await m.edit(f"🔃 Join retry {count}...")
             await asyncio.sleep(random.uniform(6.5, 8.5))
             continue
-        except BaseException:
+        except Exception:
             break
         if state:
             break
@@ -256,7 +256,7 @@ async def _leave(c, m):
     state = False
     try:
         state = bool(await c.leave_chat(chat_id, delete=True))
-    except BaseException:
+    except Exception:
         pass
     text = "✅ Leaved" if state else "❌ Error"
     await m.edit(text)
@@ -277,6 +277,6 @@ async def _kickme(c, m):
     """
     try:
         await c.leave_chat(m.chat.id, delete=True)
-    except BaseException:
+    except Exception:
         pass
     await m.delete()

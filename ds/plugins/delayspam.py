@@ -45,7 +45,7 @@ async def _ds(c, m):
     try:
         args = cmd[1:]
         delay, count = int(args[0]), int(args[1])
-    except BaseException:
+    except Exception:
         return await eor(m, f"`{Var.HANDLER}ds{ds} [delay] [count] [forward (reply only)] [text/reply]`", time=6)
     is_text, is_forward = False, False
     if m.reply_to_message_id:
@@ -228,7 +228,7 @@ async def eor(
         )
         if not time:
             return result
-    except BaseException:
+    except Exception:
         result = await message.reply(
             text,
             quote=True,
