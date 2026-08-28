@@ -170,12 +170,12 @@ async def run_delayspam(
         except errors.RPCError:
             pass
         except Exception as err:
-            client.log.exception(err)
             if chat_id not in Var.ERROR_RETRY:
                 Var.ERROR_RETRY.update({chat_id: 1})
             else:
                 Var.ERROR_RETRY.update({chat_id: Var.ERROR_RETRY[chat_id] + 1})
             if chat_id in Var.ERROR_RETRY and Var.ERROR_RETRY[chat_id] > 3:
+                client.log.warning(err)
                 Var.ERROR_RETRY.pop(chat_id)
                 break
 

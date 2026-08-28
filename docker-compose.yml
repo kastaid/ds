@@ -1,9 +1,13 @@
 services:
   ds:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: ds:latest
+    container_name: ds-${COMPOSE_PROJECT_NAME}
     init: true
     restart: unless-stopped
+    
     volumes:
       - ./:/app
     env_file:

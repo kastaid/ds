@@ -9,13 +9,14 @@ from datetime import UTC, datetime
 from loguru import logger as LOG
 
 from . import PROJECT
+from .config import Var
 
 LOG.remove()
 LOG.add(
     f"logs/{PROJECT}-{datetime.now(UTC):%Y-%m-%d}.log",
     format="{time:YYYY-MM-DD HH:mm:ss} | {level:<8} | {name}:{function}:{line} | {message}",
-    backtrace=False,
-    diagnose=False,
+    backtrace=Var.DEV_MODE,
+    diagnose=Var.DEV_MODE,
     enqueue=True,
     catch=True,
     rotation="3 MB",
@@ -26,8 +27,8 @@ LOG.add(
     sys.stdout,
     level="INFO",
     format="{time:MM-DD HH:mm:ss} | {level:<8} | {message}",
-    filter=lambda r: r["level"].name != "ERROR",
-    colorize=False,
+    filter=lambda r: r["level"].no < 30,
+    colorize=Var.DEV_MODE,
     backtrace=False,
     diagnose=False,
     enqueue=True,
@@ -35,18 +36,18 @@ LOG.add(
 )
 LOG.add(
     sys.stderr,
-    level="ERROR",
+    level="WARNING",
     format="{time:MM-DD HH:mm:ss} | {level:<8} | {name}:{function}:{line} | {message}",
-    colorize=False,
-    backtrace=False,
-    diagnose=False,
+    colorize=Var.DEV_MODE,
+    backtrace=Var.DEV_MODE,
+    diagnose=Var.DEV_MODE,
     enqueue=True,
     catch=True,
 )
 
 
 class InterceptHandler(logging.Handler):
-    def emit(self, record):
+    def emit(self, record: logging.LogRecord) -> None:
         try:
             level = LOG.level(record.levelname).name
         except ValueError:
@@ -69,9 +70,10 @@ logging.basicConfig(
     force=True,
 )
 logging.disable(logging.DEBUG)
-for name in (
-    "asyncio",
-    "pyrogram",
-    "pyrogram.dispatcher",
-):
-    logging.getLogger(name).setLevel(logging.ERROR)
+
+if not Var.DEV_MODE:
+    for name in (
+        "pyrogram",
+        "pyrogram.dispatcher",
+    ):
+        logging.getLogger(name).setLevel(logging.WARNING)
