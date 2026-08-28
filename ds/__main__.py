@@ -9,7 +9,7 @@ from pyrogram import idle
 
 from .kasta import KastaClient
 from .logger import LOG
-from .patcher import *  # noqa
+from .patcher import *
 
 
 async def main() -> None:

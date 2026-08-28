@@ -12,10 +12,6 @@ from . import WORKERS, Root
 load_dotenv(Root / ".env", override=True)
 
 
-def env(key: str, default: str = "") -> str:
-    return getenv(key, default).strip()
-
-
 def to_bool(value: str) -> bool:
     value = value.lower()
     if value in {"y", "yes", "t", "true", "on", "1", "enable", "enabled"}:
@@ -23,6 +19,10 @@ def to_bool(value: str) -> bool:
     if value in {"n", "no", "f", "false", "off", "0", "disable", "disabled"}:
         return False
     raise ValueError(f"Invalid boolean value: {value!r}")
+
+
+def env(key: str, default: str = "") -> str:
+    return getenv(key, default).strip()
 
 
 class Var:

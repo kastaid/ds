@@ -2,16 +2,27 @@
 # https://github.com/kastaid/ds
 # MIT License
 
-FROM python:3.14-slim-bookworm
-COPY --from=ghcr.io/astral-sh/uv:0.10.11 /uv /uvx /bin/
+ARG PYTHON_IMAGE=python3.14-trixie-slim
+ARG UV_VERSION=0.12.7
+FROM ghcr.io/astral-sh/uv:${UV_VERSION}-${PYTHON_IMAGE}
 ENV TERM=xterm \
-    PATH=/opt/venv/bin:$PATH \
+    DEBIAN_FRONTEND=noninteractive \
+    UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
-    UV_COMPILE_BYTECODE=1
+    UV_SYSTEM_PYTHON=1 \
+    UV_BREAK_SYSTEM_PACKAGES=1
 WORKDIR /app
 COPY requirements.txt .
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv venv /opt/venv && \
-    uv pip install -r requirements.txt
+    uv pip install -qr requirements.txt && \
+    python_prefix=/usr/local && \
+    python_dir="$python_prefix"/lib/python3.14 && \
+    rm -rf \
+        "$python_prefix"/bin/pip \
+        "$python_prefix"/bin/pip3 \
+        "$python_prefix"/bin/pip3.14 \
+        "$python_dir"/site-packages/pip \
+        "$python_dir"/site-packages/pip-*.dist-info \
+        "$python_dir"/ensurepip
 COPY . .
 CMD ["python", "-m", "ds"]

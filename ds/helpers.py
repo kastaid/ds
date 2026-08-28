@@ -3,7 +3,6 @@
 # MIT License
 
 import os
-import shutil
 import subprocess
 import sys
 
@@ -61,7 +60,7 @@ def get_terminal_logs() -> list[str]:
 def restart(update: bool = False) -> None:
     if update:
         reqs = str(Root / "requirements.txt")
-        if shutil.which("uv"):
+        try:
             subprocess.run(
                 [
                     "uv",
@@ -72,7 +71,7 @@ def restart(update: bool = False) -> None:
                 ],
                 check=True,
             )
-        else:
+        except FileNotFoundError:
             subprocess.run(
                 [
                     sys.executable,

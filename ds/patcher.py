@@ -4,38 +4,58 @@
 
 import asyncio
 import random
-from typing import TYPE_CHECKING, Any
+from collections.abc import Callable
+from contextlib import (
+    asynccontextmanager,
+    contextmanager,
+)
+from inspect import isasyncgenfunction
+from typing import Any
 
 import pyrogram.client
 import pyrogram.errors
 import pyrogram.types.messages_and_media.message
 
-if TYPE_CHECKING:
-    from collections.abc import Callable
+type Decorator[T] = Callable[[type[T]], type[T]]
+type AnyCallable = Callable[..., Any]
 
 
-def patch[T](target: Any) -> Callable[[type[T]], type[T]]:
-    def is_patchable(item: tuple[str, Any]) -> bool:
-        return getattr(item[1], "patchable", False)
-
+def patch[T](target: type[Any]) -> Decorator[T]:
     def wrapper(container: type[T]) -> type[T]:
-        for name, func in filter(is_patchable, container.__dict__.items()):
+        for name, func in container.__dict__.items():
+            if not getattr(func, "patchable", False):
+                continue
+
             old = getattr(target, name, None)
             if old is not None:
                 setattr(target, f"old_{name}", old)
-            if getattr(func, "is_property", False):
-                setattr(target, name, property(func))
+
+            if func.is_property:
+                patched = property(func)
+            elif func.is_static:
+                patched = staticmethod(func)
+            elif func.is_context:
+                patched = asynccontextmanager(func) if isasyncgenfunction(func) else contextmanager(func)
             else:
-                setattr(target, name, func)
+                patched = func
+
+            setattr(target, name, patched)
+
         return container
 
     return wrapper
 
 
-def patchable(is_property: bool = False) -> Callable:
-    def wrapper(func: Callable) -> Callable:
+def patchable(
+    is_property: bool = False,
+    is_static: bool = False,
+    is_context: bool = False,
+) -> Callable[[AnyCallable], AnyCallable]:
+    def wrapper(func: AnyCallable) -> AnyCallable:
         func.patchable = True
         func.is_property = is_property
+        func.is_static = is_static
+        func.is_context = is_context
         return func
 
     return wrapper

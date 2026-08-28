@@ -38,8 +38,8 @@ class KastaClient(RawClient):
             workers=Var.WORKERS,
             workdir=Root,
             parse_mode=ParseMode.HTML,
-            system_version=" ".join((version(), machine())),
-            plugins={"root": "".join((PROJECT, ".plugins")), "exclude": []},
+            system_version=f"{version()} {machine()}",
+            plugins={"root": f"{PROJECT}.plugins", "exclude": []},
             sleep_threshold=15,
         )
         self.protocol_factory = TCPAbridged
@@ -65,10 +65,10 @@ class KastaClient(RawClient):
             await asyncio.sleep(random.uniform(*_jitter))
             await super().start()
             self.me = await self.get_me()
-        except Exception as err:
-            self.log.exception(err)
-            self.log.error(">> USERBOT EXITING.")
+        except Exception:
+            self.log.exception(">> USERBOT crashed during start")
             sys.exit(1)
+
         _me = [
             ">> USERBOT DETAILS:",
             f"ID: {self.me.id}",
@@ -103,11 +103,7 @@ class KastaClient(RawClient):
 
     async def __join_us(self) -> None:
         try:
-            await self.join_chat(-1001174631272)
             await asyncio.sleep(random.uniform(3.5, 6.5))
-        except Exception:
-            pass
-        try:
-            await self.join_chat(-1001699144606)
+            await self.join_chat(-1004361705646)
         except Exception:
             pass
