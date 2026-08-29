@@ -9,7 +9,8 @@ services:
     restart: unless-stopped
     
     volumes:
-      - ./:/app
+      - ./logs:/app/logs
+      - ./data:/app/data
     env_file:
       - .env
     network_mode: bridge

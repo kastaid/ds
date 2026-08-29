@@ -5,7 +5,6 @@
 import asyncio
 import random
 import sys
-from platform import machine, version
 from time import monotonic
 from typing import TYPE_CHECKING
 
@@ -14,9 +13,13 @@ from pyrogram.connection.transport import TCPAbridged
 from pyrogram.enums import ParseMode
 from pyrogram.raw.all import layer
 
-from . import PROJECT, Root, StartTime
+from . import (
+    DATA_DIR,
+    PROJECT,
+    StartTime,
+)
 from .config import Var
-from .helpers import time_formatter
+from .helpers import format_time
 from .logger import LOG
 
 if TYPE_CHECKING:
@@ -36,9 +39,8 @@ class KastaClient(RawClient):
             api_hash=Var.API_HASH,
             session_string=Var.STRING_SESSION,
             workers=Var.WORKERS,
-            workdir=Root,
+            workdir=DATA_DIR,
             parse_mode=ParseMode.HTML,
-            system_version=f"{version()} {machine()}",
             plugins={"root": f"{PROJECT}.plugins", "exclude": []},
             sleep_threshold=15,
         )
@@ -60,17 +62,17 @@ class KastaClient(RawClient):
                 raise ValueError("Required: API_HASH not set in .env")
             if not Var.STRING_SESSION:
                 raise ValueError("Required: STRING_SESSION not set in .env")
-            self.log.info(">> 🚀 STARTING USERBOT...")
+            self.log.info("> 🚀 STARTING USERBOT...")
             _jitter = (3.5, 6.5) if Var.DEV_MODE else (1.5, 3.5)
             await asyncio.sleep(random.uniform(*_jitter))
             await super().start()
             self.me = await self.get_me()
         except Exception:
-            self.log.exception(">> USERBOT crashed during start")
+            self.log.exception("> USERBOT crashed during start")
             sys.exit(1)
 
         _me = [
-            ">> USERBOT DETAILS:",
+            "> USERBOT DETAILS:",
             f"ID: {self.me.id}",
             f"First Name: {self.me.first_name}",
         ]
@@ -83,10 +85,10 @@ class KastaClient(RawClient):
         _me.append(f"Layer: {layer}")
         self.log.info("\n".join(_me))
         await self.__join_us()
-        done = time_formatter(monotonic() - StartTime)
-        launch = f">> 🚀 Userbot launched in {done}, layer: {layer}."
+        done = format_time(monotonic() - StartTime)
+        launch = f"> 🚀 Userbot launched in {done}, layer: {layer}."
         await self.send_message("me", launch)
-        self.log.success(f">> 🔥 USERBOT UP IN {done}.")
+        self.log.success(f"> 🔥 USERBOT UP IN {done}.")
         Var.IS_STARTUP = True
         return self
 
@@ -96,7 +98,7 @@ class KastaClient(RawClient):
         self._stopped = True
         try:
             await super().stop(block=block)
-            self.log.warning(">> USERBOT STOPPED.")
+            self.log.warning("> USERBOT STOPPED.")
         except BaseException:
             pass
         return self

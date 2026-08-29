@@ -6,13 +6,21 @@ import asyncio
 import random
 from time import monotonic
 
-from pyrogram import filters
-from pyrogram.errors import RPCError, UsersTooMuch
+from pyrogram import (
+    errors,
+    filters,
+)
+from pyrogram.raw.functions import Ping
 from pyrogram.raw.functions.messages import ReadMentions, ReadReactions
 
 from ds import StartTime
 from ds.config import Var
-from ds.helpers import get_terminal_logs, restart, time_formatter
+from ds.helpers import (
+    format_latency,
+    format_time,
+    get_terminal_logs,
+    restart,
+)
 from ds.kasta import KastaClient
 
 
@@ -24,28 +32,30 @@ from ds.kasta import KastaClient
     & filters.me
     & ~filters.forwarded
 )
-async def _ping(_, m):
+async def _ping(c, m):
     """
     Ping Telegram server
     Usage: ping
     """
     start = monotonic()
-    msg = await m.reply(
-        "Ping !",
-        quote=False,
-    )
-    text = "🏓 Pong !!\n"
-    text += f"Speed – {monotonic() - start:.3f}s\n"
-    text += f"Uptime – {time_formatter(monotonic() - StartTime)}"
     try:
-        await m.delete()
-        await msg.edit(text)
-    except Exception:
-        await msg.delete()
-        await m.reply(
-            text,
-            quote=False,
+        await c.invoke(
+            Ping(ping_id=0),
+            retries=1,
+            timeout=5,
         )
+    finally:
+        text = f"Speed: {format_latency(monotonic() - start)}\n"
+        text += "Uptime: {}".format(
+            format_time(
+                monotonic() - StartTime,
+                short=True,
+            )
+        )
+        try:
+            await m.edit(text)
+        except Exception:
+            pass
 
 
 @KastaClient.on_message(
@@ -152,14 +162,14 @@ async def _purge(c, m):
         if len(chunk) >= 100:
             try:
                 await c.delete_messages(chat_id, chunk)
-            except RPCError:
+            except errors.RPCError:
                 pass
             chunk.clear()
             await asyncio.sleep(random.uniform(1.5, 3.5))
     if len(chunk) > 0:
         try:
             await c.delete_messages(chat_id, chunk)
-        except RPCError:
+        except errors.RPCError:
             pass
     await m.delete()
 
@@ -180,7 +190,7 @@ async def _read(c, m):
     chat_id = m.chat.id
     try:
         peer = await c.resolve_peer(chat_id)
-    except RPCError:
+    except errors.RPCError:
         return
     await asyncio.gather(
         *[
@@ -193,7 +203,7 @@ async def _read(c, m):
     )
     try:
         await c.read_chat_history(chat_id)
-    except RPCError:
+    except errors.RPCError:
         pass
     await m.delete()
 
@@ -221,7 +231,7 @@ async def _join(c, m):
     while True:
         try:
             state = bool(await c.join_chat(chat_id))
-        except UsersTooMuch:
+        except errors.UsersTooMuch:
             count += 1
             await m.edit(f"🔃 Join retry {count}...")
             await asyncio.sleep(random.uniform(6.5, 8.5))

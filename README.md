@@ -45,7 +45,7 @@ cd ds
 
 #### String Session
 
-Generate `STRING_SESSION` by choosing **Pyrofork** at [@strgen_bot](https://t.me/strgen_bot).
+Generate `STRING_SESSION` by running `python3 strgen.py`.
 
 #### Config
 

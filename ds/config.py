@@ -6,7 +6,7 @@ from os import getenv
 
 from dotenv import load_dotenv
 
-from . import WORKERS, Root
+from . import Root
 
 load_dotenv(Root / ".env", override=True)
 
@@ -26,12 +26,9 @@ def env(key: str, default: str = "") -> str:
 
 class Var:
     DEV_MODE: bool = to_bool(env("DEV_MODE", "false"))
+    WORKERS: int = int(env("WORKERS", "3"))
     API_ID: int = int(env("API_ID", "0"))
     API_HASH: str = env("API_HASH", "")
     STRING_SESSION: str = env("STRING_SESSION", "")
     HANDLER: str = env("HANDLER", "")
-    WORKERS: int = int(env("WORKERS", str(WORKERS)))
     IS_STARTUP: bool = False
-
-
-del load_dotenv, WORKERS, Root
