@@ -23,9 +23,9 @@ if __name__ == "__main__":
     try:
         uvloop.run(main())
     except KeyboardInterrupt:
-        LOG.warning("[APP] Shutdown signal received.")
-    except Exception as err:
-        LOG.exception(f"[APP] Unhandled exception: {err}")
+        LOG.info("[APP] shutdown signal received")
+    except Exception:
+        LOG.exception("[APP] unhandled exception")
         sys.exit(1)
     finally:
-        LOG.warning("[APP] Stopped.")
+        LOG.info("[APP] stopped")

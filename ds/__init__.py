@@ -3,25 +3,33 @@
 # MIT License
 
 from pathlib import Path
-from shutil import rmtree
 from time import monotonic
 
 from version import __version__  # noqa
 
 PROJECT = "ds"
+
 StartTime = monotonic()
+
 Root = Path(__file__).parent.parent
-WORKERS = 3
+LOG_DIR = Root / "logs"
+DATA_DIR = Root / "data"
 
-DIRS = ("logs/",)
-for d in DIRS:
-    if not (Root / d).exists():
-        (Root / d).mkdir(parents=True, exist_ok=True)
-    else:
-        for i in (Root / d).rglob("*"):
-            if i.is_dir():
-                rmtree(i, ignore_errors=True)
-            else:
-                i.unlink(missing_ok=True)
 
-del Path, rmtree, monotonic
+def ensure_dir(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+
+
+def clean_files(path: Path) -> None:
+    if not path.exists():
+        return
+    for i in path.rglob("*"):
+        if i.is_file():
+            i.unlink(missing_ok=True)
+
+
+for path in (
+    LOG_DIR,
+    DATA_DIR,
+):
+    ensure_dir(path)

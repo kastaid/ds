@@ -2,8 +2,6 @@
 # https://github.com/kastaid/ds
 # MIT License
 
-import asyncio
-import random
 from collections.abc import Callable
 from contextlib import (
     asynccontextmanager,
@@ -67,36 +65,12 @@ class Client:
     async def invoke(self, *args, **kwargs):
         try:
             return await self.old_invoke(*args, **kwargs)
-        except pyrogram.errors.FloodWait as fw:
-            self.log.warning(fw)
-            await asyncio.sleep(fw.value + random.uniform(10, 15))
-            return await self.invoke(*args, **kwargs)
         except (
             TimeoutError,
             pyrogram.errors.UserIsBlocked,
             pyrogram.errors.PersistentTimestampInvalid,
         ):
             pass
-
-    @patchable()
-    async def resolve_peer(self, *args, **kwargs):
-        try:
-            return await self.old_resolve_peer(*args, **kwargs)
-        except pyrogram.errors.FloodWait as fw:
-            self.log.warning(fw)
-            await asyncio.sleep(fw.value + random.uniform(10, 15))
-            return await self.resolve_peer(*args, **kwargs)
-        except pyrogram.errors.PeerIdInvalid:
-            pass
-
-    @patchable()
-    async def save_file(self, *args, **kwargs):
-        try:
-            return await self.old_save_file(*args, **kwargs)
-        except pyrogram.errors.FloodWait as fw:
-            self.log.warning(fw)
-            await asyncio.sleep(fw.value + random.uniform(10, 15))
-            return await self.save_file(*args, **kwargs)
 
 
 @patch(pyrogram.types.messages_and_media.message.Message)
