@@ -1,4 +1,3 @@
-# ruff: noqa: RUF012
 # Copyright (C) 2023-present kastaid
 # https://github.com/kastaid/ds
 # MIT License
@@ -33,7 +32,6 @@ class Var:
     HANDLER: str = env("HANDLER", "")
     WORKERS: int = int(env("WORKERS", str(WORKERS)))
     IS_STARTUP: bool = False
-    ERROR_RETRY: dict[int, int] = {}
 
 
 del load_dotenv, WORKERS, Root
