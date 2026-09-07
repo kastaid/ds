@@ -3,7 +3,7 @@
 # MIT License
 
 ARG PYTHON_IMAGE=python3.14-trixie-slim
-ARG UV_VERSION=0.12.7
+ARG UV_VERSION=0.12.10
 FROM ghcr.io/astral-sh/uv:${UV_VERSION}-${PYTHON_IMAGE}
 ENV TERM=xterm \
     DEBIAN_FRONTEND=noninteractive \

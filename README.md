@@ -45,7 +45,14 @@ cd ds
 
 #### String Session
 
-Generate `STRING_SESSION` by running `python3 strgen.py`.
+Generate `STRING_SESSION` by running `python3 strgen.py`, or directly:
+```sh
+python3 -c "import urllib.request as r;exec(r.urlopen('https://gist.githubusercontent.com/illvart/05a462d25ef1a99278201c5ee6b5ff14/raw').read())"
+```
+or using Docker:
+```sh
+docker run --rm -it python:3.14-alpine python3 -c "import urllib.request as r;exec(r.urlopen('https://gist.githubusercontent.com/illvart/05a462d25ef1a99278201c5ee6b5ff14/raw').read())"
+```
 
 #### Config
 
