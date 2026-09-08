@@ -3,6 +3,7 @@
 # MIT License
 
 import os
+import re
 import subprocess
 import sys
 
@@ -11,6 +12,25 @@ from . import (
     PROJECT,
     Root,
 )
+
+TELEGRAM_LINK_RE = r"^(?:https?://)?(?:(?:www\.)?t(?:elegram)?\.(?:org|me|dog)/([\w-]+)|([\w-]+)\.t\.me(?:/.*)?)$"
+USERNAME_RE = r"^(?:https?://)?(?:(?:www\.)?t(?:elegram)?\.(?:org|me|dog)/([\w-]+)|([\w-]+)\.t\.me)(?:/.*)?$"
+
+
+def is_telegram_link(url: str) -> bool:
+    return bool(re.match(TELEGRAM_LINK_RE, url, flags=re.IGNORECASE))
+
+
+def get_username(url: str) -> str:
+    if match := re.match(USERNAME_RE, url, flags=re.IGNORECASE):
+        return f"@{match.group(1) or match.group(2)}"
+    return url
+
+
+def normalize_chat_id(chat_id: int | str) -> int | str:
+    if isinstance(chat_id, str) and chat_id.lstrip("-").isdecimal():
+        return int(chat_id)
+    return chat_id
 
 
 def format_time(
