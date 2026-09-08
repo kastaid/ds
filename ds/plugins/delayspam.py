@@ -4,6 +4,7 @@
 
 import asyncio
 import random
+import re
 from typing import TYPE_CHECKING
 
 from pyrogram import (
@@ -13,6 +14,11 @@ from pyrogram import (
 )
 
 from ds.config import Var
+from ds.helpers import (
+    get_username,
+    is_telegram_link,
+    normalize_chat_id,
+)
 from ds.kasta import KastaClient
 
 if TYPE_CHECKING:
@@ -24,6 +30,7 @@ DS_RANDOM_THRESHOLD = 60
 DS_RANDOM_DELAY = (3.5, 6.5)
 DS_TASKS: dict[int, dict[int, asyncio.Task]] = {i: {} for i in DS_RANGE}
 DS_ERROR_MAX = 3
+TARGET_RE = re.compile(r"(?:^|\s+)to=(\S+)(?=\s|$)", re.IGNORECASE)
 
 
 @KastaClient.on_message(
@@ -37,28 +44,34 @@ DS_ERROR_MAX = 3
 async def _ds(c, m):
     """
     Start ds, ds1 - ds9
-    Usage: ds [delay] [count] [forward (reply only)] [text/reply]
+    Usage: ds [delay] [count] [forward (reply only)] [text/reply] [to=chat]
     """
-    chat_id = m.chat.id
-    cmd = m.command
-    ds = int(cmd[0].lower()[2:3] or 0)
+    chat_id, text = await parse_target(c, m, text=m.text.markdown)
+    if chat_id is None:
+        return await eor(m, "Invalid target chat.", time=3)
+    ds = int(m.command[0].lower()[2:3] or 0)
     ds_name = get_ds_name(ds)
     task_store = get_task_store(ds)
     if chat_id in task_store:
         return await eor(m, f"Please wait, {ds_name} is running or cancel it.", time=3)
     await m.delete()
     try:
-        args = cmd[1:]
-        delay, count = int(args[0]), int(args[1])
+        args = text.split(maxsplit=3)
+        delay, count = int(args[1]), int(args[2])
     except Exception:
-        return await eor(m, f"`{Var.HANDLER}{ds_name} [delay] [count] [forward (reply only)] [text/reply]`", time=6)
+        return await eor(
+            m,
+            f"`{Var.HANDLER}{ds_name} [delay] [count] [forward (reply only)] [text/reply] [to=chat]`",
+            time=6,
+        )
     is_text, is_forward = False, False
+    from_chat_id = m.chat.id
     if m.reply_to_message_id:
         message = m.reply_to_message
         message_id = message.id
         is_forward = "forward" in m.text.lower()
     else:
-        message = " ".join(m.text.markdown.split(" ")[3:])
+        message = args[3]
         message_id = 0
         is_text = True
     delay = max(DS_DELAY_MIN, delay)
@@ -67,6 +80,7 @@ async def _ds(c, m):
             c,
             ds,
             chat_id,
+            from_chat_id,
             message,
             message_id,
             delay,
@@ -87,21 +101,23 @@ async def _ds(c, m):
     & filters.me
     & ~filters.forwarded
 )
-async def _dscancel(_, m):
+async def _dscancel(c, m):
     """
-    Cancel ds - ds9 in current chat
-    Usage: dscancel, ds1cancel
+    Cancel ds - ds9 in target chat
+    Usage: dscancel [to=chat], ds1cancel [to=chat]
     """
-    chat_id = m.chat.id
+    chat_id, _ = await parse_target(c, m, text=" ".join(m.command[1:]))
+    if chat_id is None:
+        return await eor(m, "Invalid target chat.", time=3)
     ds = int(m.command[0].lower()[2:3].replace("c", "") or 0)
     ds_name = get_ds_name(ds)
     task_store = get_task_store(ds)
     if chat_id not in task_store:
-        return await eor(m, f"No {ds_name} is running in current chat.", time=3)
+        return await eor(m, f"No {ds_name} is running in target chat.", time=3)
     task = task_store.pop(chat_id)
     if not task.done():
         task.cancel()
-    await eor(m, f"`canceled {ds_name} in current chat`", time=6)
+    await eor(m, f"`canceled {ds_name} in target chat`", time=6)
 
 
 @KastaClient.on_message(
@@ -160,6 +176,7 @@ async def run_ds(
     client: KastaClient,
     ds: int,
     chat_id: int,
+    from_chat_id: int,
     message: Message | str,
     message_id: int,
     delay: int,
@@ -178,6 +195,7 @@ async def run_ds(
                 client,
                 message,
                 chat_id,
+                from_chat_id,
                 message_id,
                 is_text,
                 is_forward,
@@ -222,6 +240,7 @@ async def send_ds_message(
     client: KastaClient,
     message: str | Message,
     chat_id: int,
+    from_chat_id: int,
     message_id: int,
     is_text: bool,
     is_forward: bool,
@@ -236,13 +255,13 @@ async def send_ds_message(
     if is_forward:
         return await client.forward_messages(
             chat_id,
-            from_chat_id=chat_id,
+            from_chat_id=from_chat_id,
             message_ids=message_id,
             disable_notification=True,
         )
     return await client.copy_message(
         chat_id,
-        from_chat_id=chat_id,
+        from_chat_id=from_chat_id,
         message_id=message_id,
         parse_mode=enums.ParseMode.DEFAULT,
         disable_notification=True,
@@ -280,3 +299,27 @@ async def eor(
         await asyncio.sleep(time)
         result = await result.delete()
     return result
+
+
+async def parse_target(
+    client: KastaClient,
+    message: Message,
+    *,
+    text: str,
+) -> tuple[int | None, str]:
+    match = TARGET_RE.search(text)
+    target = match.group(1) if match else None
+    if match:
+        text = text[: match.start()] + text[match.end() :]
+    if not target:
+        return message.chat.id, text
+    chat_id = normalize_chat_id(target)
+    if isinstance(chat_id, int):
+        return chat_id, text
+    if is_telegram_link(chat_id):
+        chat_id = get_username(chat_id)
+    try:
+        chat = await client.get_chat(chat_id)
+        return chat.id, text
+    except Exception:
+        return None, text
