@@ -1,4 +1,4 @@
-# ds
+# DS
 
 **Pyrogram userbot for delay spam in multiple chats**
 
@@ -22,6 +22,7 @@
   - [Docker Compose](#docker-compose)
   - [Locally](#locally)
 - [Usage](#usage)
+- [Update](#update)
 - [Supports](#supports)
 - [Contributing](#contributing)
 - [License](#license)
@@ -34,7 +35,7 @@
 
 ## Quick Start
 
-Follow these steps to set up and run **ds** on your system.
+Follow these steps to set up and run **DS** on your system.
 
 ### Clone Repository
 
@@ -74,15 +75,30 @@ git pull && \
 
 ### Locally
 
-Run ds locally on your machine or server (e.g., on Termux).
+Run DS locally on your machine or server (e.g., on Termux).
+
+We recommend using [uv](https://docs.astral.sh/uv/) for faster and more reliable Python package management.
 
 #### Production
+Using uv:
+```sh
+uv pip install -r requirements.txt
+python3 -m ds
+```
+Using pip:
 ```sh
 pip3 install -r requirements.txt
 python3 -m ds
 ```
 
 #### Development
+Using uv:
+```sh
+uv pip install -r requirements.txt
+uv pip install -r requirements-dev.txt
+python3 -m run --watch
+```
+Using pip:
 ```sh
 pip3 install -r requirements.txt
 pip3 install -r requirements-dev.txt
@@ -93,22 +109,67 @@ More commands: run `python3 -m run -h`.
 
 ## Usage
 
-Once successfully deployed, test your ds by sending `ping` in any chat.
+Once successfully deployed, test your DS by sending `ping` in any chat.
 
+### Start DS
+Usage:
+```sh
+ds [delay] [count] [forward (reply only)] [text/reply] [to=chat]
+ds1 [delay] [count] [forward (reply only)] [text/reply] [to=chat]
+```
+Examples:
 ```sh
 ds 5 10 ok
 ds1 9 5 cool
+```
+You can run up to 10 independent DS tasks (`ds` - `ds9`).
 
-dscancel
-ds1cancel
+Send to a specific chat:
+```sh
+ds 5 10 ok to=@username
+ds1 9 5 cool to=-1001234567890
+```
 
+Reply to a message and use `forward` to forward it instead of copying:
+```sh
+ds 5 10 forward
+```
+
+### Cancel
+Cancel DS in a specific chat:
+```sh
+dscancel [to=chat]
+ds1cancel [to=chat]
+```
+
+### Stop
+Stop DS tasks in all chats:
+```sh
 dsstop
 ds1stop
+```
 
+### Clear
+Stop and clear all DS tasks:
+```sh
 dsclear
 ```
 
-Please read how the delay spam commands work at [delayspam.py](ds/plugins/delayspam.py).
+For more details, see [delayspam.py](ds/plugins/delayspam.py).
+
+## Update
+
+DS supports updating through Git.
+
+For manual updates:
+```sh
+git pull
+```
+If you updated from an older version and experience errors, fix your local repo with:
+```sh
+git fetch origin && git reset --hard origin/main
+```
+This is **NOT** required for fresh installs.
 
 ## Supports
 
