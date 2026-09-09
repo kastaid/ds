@@ -159,9 +159,7 @@ For more details, see [delayspam.py](ds/plugins/delayspam.py).
 
 ## Update
 
-DS supports updating through Git.
-
-For manual updates:
+DS supports updating through Git:
 ```sh
 git pull
 ```
