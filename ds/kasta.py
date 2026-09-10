@@ -4,6 +4,7 @@
 
 import asyncio
 import random
+import signal
 import sys
 from time import monotonic
 from typing import TYPE_CHECKING
@@ -53,11 +54,15 @@ class KastaClient(BaseClient):
             session_string=Var.STRING_SESSION,
             workers=Var.WORKERS,
             workdir=DATA_DIR,
-            parse_mode=enums.ParseMode.HTML,
             plugins={"root": f"{PROJECT}.plugins", "exclude": []},
+            parse_mode=enums.ParseMode.HTML,
+            no_updates=False,
+            skip_updates=True,
             sleep_threshold=15,
+            max_concurrent_transmissions=1,
+            max_message_cache_size=1000,
+            protocol_factory=TCPAbridged,
         )
-        self.protocol_factory = TCPAbridged
 
     def create_task(
         self,
@@ -91,6 +96,27 @@ class KastaClient(BaseClient):
             self._me = me
         return me
 
+    async def bootstrap(self) -> None:
+        loop = asyncio.get_running_loop()
+        stop = loop.create_future()
+        signals = (signal.SIGINT, signal.SIGTERM, signal.SIGABRT)
+
+        def _signal_handler(signum: int) -> None:
+            sig_name = signal.Signals(signum).name
+            self.log.warning(f"> STOP SIGNAL RECEIVED ({sig_name})")
+            if not stop.done():
+                stop.set_result(None)
+
+        for sig in signals:
+            loop.add_signal_handler(sig, _signal_handler, sig)
+        try:
+            await self.start()
+            await stop
+        finally:
+            for sig in signals:
+                loop.remove_signal_handler(sig)
+            await self.stop()
+
     async def start(self) -> None:
         try:
             if not Var.API_ID:
@@ -103,11 +129,23 @@ class KastaClient(BaseClient):
             self.log.info("> 🚀 STARTING USERBOT...")
             if Var.DEV_MODE:
                 await asyncio.sleep(random.uniform(3.5, 6.5))
-            await super().start()
-        except errors.FloodWait as fw:
-            self.log.warning(fw)
-            await asyncio.sleep(fw.value + random.uniform(10, 15))
-            await super().start()
+            for attempt in range(1, 3 + 1):
+                try:
+                    await super().start()
+                    break
+                except (
+                    errors.FloodWait,
+                    errors.FloodPremiumWait,
+                ) as fw:
+                    amount = fw.value
+                    if amount > 300:
+                        self.log.error(f"> FLOOD WAIT TOO LONG ({amount}s)")
+                        sys.exit(1)
+                    self.log.warning(f"> FLOOD WAIT {amount}s ({attempt}/3)")
+                    await asyncio.sleep(amount + random.uniform(10, 15))
+            else:
+                self.log.error("> START FAILED: FLOOD RETRIES EXHAUSTED")
+                sys.exit(1)
         except Exception:
             self.log.exception("> USERBOT crashed during start")
             sys.exit(1)
@@ -132,8 +170,22 @@ class KastaClient(BaseClient):
         await self.send_message("me", launch)
         self.log.success(f"> 🔥 USERBOT UP IN {done}.")
         Var.IS_STARTUP = True
+        Var.STARTUP_EVENT.set()
 
     async def stop(self) -> None:
+        if self._tasks:
+            for task in self._tasks:
+                task.cancel()
+            try:
+                await asyncio.wait_for(
+                    asyncio.gather(
+                        *self._tasks,
+                        return_exceptions=True,
+                    ),
+                    timeout=5,
+                )
+            except TimeoutError:
+                pass
         try:
             await super().stop()
             self.log.warning("> USERBOT STOPPED.")

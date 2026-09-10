@@ -11,6 +11,7 @@ from pyrogram import (
     enums,
     errors,
     filters,
+    types,
 )
 
 from ds.config import Var
@@ -31,6 +32,12 @@ DS_RANDOM_DELAY = (3.5, 6.5)
 DS_TASKS: dict[int, dict[int, asyncio.Task]] = {i: {} for i in DS_RANGE}
 DS_ERROR_MAX = 3
 TARGET_RE = re.compile(r"(?:^|\s+)to=(\S+)(?=\s|$)", re.IGNORECASE)
+DEFAULT_PARSE_MODE = enums.ParseMode.DEFAULT
+LINK_PREVIEW = types.LinkPreviewOptions(
+    is_disabled=False,
+    prefer_small_media=True,
+    show_above_text=True,
+)
 
 
 @KastaClient.on_message(
@@ -44,7 +51,7 @@ TARGET_RE = re.compile(r"(?:^|\s+)to=(\S+)(?=\s|$)", re.IGNORECASE)
 async def _ds(c, m):
     """
     Start ds, ds1 - ds9
-    Usage: ds [delay] [count] [forward (reply only)] [text/reply] [to=chat]
+    Usage: ds [delay] [count] [forward/fwd (reply only)] [text/reply] [to=chat]
     """
     chat_id, text = await parse_target(c, m, text=m.text.markdown)
     if chat_id is None:
@@ -55,13 +62,13 @@ async def _ds(c, m):
     if chat_id in task_store:
         return await eor(m, f"Please wait, {ds_name} is running or cancel it.", time=3)
     await m.delete()
+    args = text.split(maxsplit=3)
     try:
-        args = text.split(maxsplit=3)
         delay, count = int(args[1]), int(args[2])
     except Exception:
         return await eor(
             m,
-            f"`{Var.HANDLER}{ds_name} [delay] [count] [forward (reply only)] [text/reply] [to=chat]`",
+            f"`{Var.HANDLER}{ds_name} [delay] [count] [forward/fwd (reply only)] [text/reply] [to=chat]`",
             time=6,
         )
     is_text, is_forward = False, False
@@ -69,7 +76,7 @@ async def _ds(c, m):
     if m.reply_to_message_id:
         message = m.reply_to_message
         message_id = message.id
-        is_forward = "forward" in m.text.lower()
+        is_forward = any(i in text.lower().split() for i in ("forward", "fwd"))
     else:
         message = args[3]
         message_id = 0
@@ -200,7 +207,7 @@ async def run_ds(
                 is_text,
                 is_forward,
             )
-            if not is_text:
+            if is_forward:
                 message_id = getattr(result, "id", message_id)
             error_count = 0
             await asyncio.sleep(delay)
@@ -249,8 +256,9 @@ async def send_ds_message(
         return await client.send_message(
             chat_id,
             message,
-            parse_mode=enums.ParseMode.DEFAULT,
+            parse_mode=DEFAULT_PARSE_MODE,
             disable_notification=True,
+            link_preview_options=LINK_PREVIEW,
         )
     if is_forward:
         return await client.forward_messages(
@@ -259,11 +267,19 @@ async def send_ds_message(
             message_ids=message_id,
             disable_notification=True,
         )
+    if message.text:
+        return await client.send_message(
+            chat_id,
+            message.text,
+            entities=message.entities,
+            parse_mode=enums.ParseMode.DISABLED,
+            disable_notification=True,
+            link_preview_options=message.link_preview_options,
+        )
     return await client.copy_message(
         chat_id,
         from_chat_id=from_chat_id,
         message_id=message_id,
-        parse_mode=enums.ParseMode.DEFAULT,
         disable_notification=True,
     )
 
@@ -278,8 +294,8 @@ async def eor(
     try:
         result = await message.edit(
             text,
-            parse_mode=enums.ParseMode.MARKDOWN,
-            disable_web_page_preview=True,
+            parse_mode=DEFAULT_PARSE_MODE,
+            link_preview_options=types.LinkPreviewOptions(is_disabled=True),
         )
         if not time:
             return result
@@ -287,8 +303,7 @@ async def eor(
         try:
             result = await message.reply(
                 text,
-                quote=True,
-                parse_mode=enums.ParseMode.MARKDOWN,
+                parse_mode=DEFAULT_PARSE_MODE,
                 disable_notification=True,
             )
             if not time:

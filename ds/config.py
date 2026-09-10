@@ -2,6 +2,7 @@
 # https://github.com/kastaid/ds
 # MIT License
 
+from asyncio import Event
 from os import getenv
 
 from dotenv import load_dotenv
@@ -32,3 +33,4 @@ class Var:
     STRING_SESSION: str = env("STRING_SESSION", "")
     HANDLER: str = env("HANDLER", "")
     IS_STARTUP: bool = False
+    STARTUP_EVENT: Event = Event()

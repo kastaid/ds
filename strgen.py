@@ -7,7 +7,7 @@ import random
 import subprocess
 import sys
 
-PACKAGE = "pyrofork==2.3.69"
+PACKAGE = "Kurigram==2.2.25"
 DELAY_RANGE = (1.5, 2.5)
 SHORT_DELAY = 1.5
 

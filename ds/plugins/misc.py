@@ -91,9 +91,8 @@ async def _logs(_, m):
     msg = await m.edit("Getting logs...")
     for count, file in enumerate(get_terminal_logs(), start=1):
         await m.reply_document(
-            document=file,
+            document=str(file),
             caption=f"Terminal Logs {count}",
-            quote=False,
         )
         await asyncio.sleep(random.uniform(1.5, 3.5))
     await msg.delete()

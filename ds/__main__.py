@@ -1,27 +1,23 @@
+# ruff: noqa E402
 # Copyright (C) 2023-present kastaid
 # https://github.com/kastaid/ds
 # MIT License
 
+import asyncio
 import sys
-
 import uvloop
-from pyrogram import idle
+from .patches import apply
 
+apply()
 from .kasta import KastaClient
 from .logger import LOG
-from .patcher import *
-
-
-async def main() -> None:
-    app = KastaClient()
-    await app.start()
-    await idle()
-    await app.stop()
-
 
 if __name__ == "__main__":
     try:
-        uvloop.run(main())
+        asyncio.run(
+            KastaClient().bootstrap(),
+            loop_factory=uvloop.new_event_loop,
+        )
     except KeyboardInterrupt:
         LOG.info("[APP] shutdown signal received")
     except Exception:

@@ -10,10 +10,6 @@ from contextlib import (
 from inspect import isasyncgenfunction
 from typing import Any
 
-import pyrogram.client
-import pyrogram.errors
-import pyrogram.types.messages_and_media.message
-
 type Decorator[T] = Callable[[type[T]], type[T]]
 type AnyCallable = Callable[..., Any]
 
@@ -57,31 +53,3 @@ def patchable(
         return func
 
     return wrapper
-
-
-@patch(pyrogram.client.Client)
-class Client:
-    @patchable()
-    async def invoke(self, *args, **kwargs):
-        try:
-            return await self.old_invoke(*args, **kwargs)
-        except (
-            TimeoutError,
-            pyrogram.errors.UserIsBlocked,
-            pyrogram.errors.PersistentTimestampInvalid,
-        ):
-            pass
-
-
-@patch(pyrogram.types.messages_and_media.message.Message)
-class Message:
-    @patchable(True)
-    def client(self) -> Client:
-        return self._client
-
-    @patchable()
-    async def delete(self, revoke: bool = True) -> bool:
-        try:
-            return await self.old_delete(revoke=revoke)
-        except Exception:
-            return False

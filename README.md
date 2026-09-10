@@ -114,8 +114,8 @@ Once successfully deployed, test your DS by sending `ping` in any chat.
 ### Start DS
 Usage:
 ```sh
-ds [delay] [count] [forward (reply only)] [text/reply] [to=chat]
-ds1 [delay] [count] [forward (reply only)] [text/reply] [to=chat]
+ds [delay] [count] [forward/fwd (reply only)] [text/reply] [to=chat]
+ds1 [delay] [count] [forward/fwd (reply only)] [text/reply] [to=chat]
 ```
 Examples:
 ```sh
@@ -130,9 +130,10 @@ ds 5 10 ok to=@username
 ds1 9 5 cool to=-1001234567890
 ```
 
-Reply to a message and use `forward` to forward it instead of copying:
+Reply to a message and use `forward` or `fwd` to forward it instead of copying:
 ```sh
 ds 5 10 forward
+ds 5 10 fwd
 ```
 
 ### Cancel
