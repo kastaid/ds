@@ -119,12 +119,9 @@ async def _dscancel(c, m):
         return await eor(m, "Invalid target chat.", time=3)
     ds = int(m.command[0].lower()[2:3].replace("c", "") or 0)
     ds_name = get_ds_name(ds)
-    task_store = get_task_store(ds)
-    if chat_id not in task_store:
+    if chat_id not in get_task_store(ds):
         return await eor(m, f"No {ds_name} is running in target chat.", time=3)
-    task = task_store.pop(chat_id)
-    if not task.done():
-        task.cancel()
+    delete_task(ds, chat_id)
     await eor(m, f"`canceled {ds_name} in target chat`", time=6)
 
 
@@ -143,12 +140,7 @@ async def _dsstop(_, m):
     """
     ds = int(m.command[0].lower()[2:3].replace("s", "") or 0)
     ds_name = get_ds_name(ds)
-    task_store = get_task_store(ds)
-    count = len(task_store)
-    for task in list(task_store.values()):
-        if not task.done():
-            task.cancel()
-    task_store.clear()
+    count = stop_task(ds)
     await eor(m, f"`stopped {ds_name} in all chats: {count} tasks`")
 
 
@@ -165,12 +157,7 @@ async def _dsclear(_, m):
     Clear and stop all ds
     usage: dsclear
     """
-    count = sum(len(store) for store in DS_TASKS.values())
-    for store in DS_TASKS.values():
-        for task in list(store.values()):
-            if not task.done():
-                task.cancel()
-        store.clear()
+    count = clear_task()
     await eor(m, f"`cleared all ds*: {count} tasks`")
 
 
@@ -180,6 +167,37 @@ def get_ds_name(ds: int) -> str:
 
 def get_task_store(ds: int) -> dict[int, asyncio.Task]:
     return DS_TASKS[ds]
+
+
+def delete_task(
+    ds: int,
+    chat_id: int,
+) -> None:
+    task = get_task_store(ds).pop(chat_id, None)
+    if task and not task.done():
+        task.cancel()
+
+
+def stop_task(ds: int) -> int:
+    count = 0
+    task_store = get_task_store(ds)
+    for task in list(task_store.values()):
+        if not task.done():
+            task.cancel()
+        count += 1
+    task_store.clear()
+    return count
+
+
+def clear_task() -> int:
+    count = 0
+    for store in DS_TASKS.values():
+        count += len(store)
+        for task in list(store.values()):
+            if not task.done():
+                task.cancel()
+        store.clear()
+    return count
 
 
 async def run_ds(
@@ -239,6 +257,10 @@ async def run_ds(
             wait = err.value + random.uniform(15, 30)
             client.log.warning(f"Delayspam {get_ds_name(ds)} flood wait: {err.value}s, sleeping {wait:.1f}s")
             await asyncio.sleep(wait)
+        except errors.UserBannedInChannel as err:
+            client.log.warning(f"Delayspam {get_ds_name(ds)} stopped in chat {chat_id}: {err}")
+            delete_task(ds, chat_id)
+            break
         except (
             errors.ChannelInvalid,
             errors.ChannelPrivate,
@@ -251,6 +273,7 @@ async def run_ds(
             errors.ChatSendMediaForbidden,
         ) as err:
             client.log.warning(f"Delayspam {get_ds_name(ds)} stopped in chat {chat_id}: {err}")
+            delete_task(ds, chat_id)
             break
         except Exception as err:
             error_count += 1
@@ -258,6 +281,7 @@ async def run_ds(
                 client.log.warning(
                     f"Delayspam {get_ds_name(ds)} stopped after {error_count} errors in chat {chat_id}: {err}"
                 )
+                delete_task(ds, chat_id)
                 break
 
 
