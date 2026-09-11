@@ -33,6 +33,7 @@ DS_TASKS: dict[int, dict[int, asyncio.Task]] = {i: {} for i in DS_RANGE}
 DS_ERROR_MAX = 3
 TARGET_RE = re.compile(r"(?:^|\s+)to=(\S+)(?=\s|$)", re.IGNORECASE)
 DEFAULT_PARSE_MODE = enums.ParseMode.DEFAULT
+NO_LINK_PREVIEW = types.LinkPreviewOptions(is_disabled=True)
 LINK_PREVIEW = types.LinkPreviewOptions(
     is_disabled=False,
     prefer_small_media=True,
@@ -143,11 +144,12 @@ async def _dsstop(_, m):
     ds = int(m.command[0].lower()[2:3].replace("s", "") or 0)
     ds_name = get_ds_name(ds)
     task_store = get_task_store(ds)
+    count = len(task_store)
     for task in list(task_store.values()):
         if not task.done():
             task.cancel()
     task_store.clear()
-    await eor(m, f"`stopped {ds_name} in all chats`")
+    await eor(m, f"`stopped {ds_name} in all chats: {count} tasks`")
 
 
 @KastaClient.on_message(
@@ -163,12 +165,13 @@ async def _dsclear(_, m):
     Clear and stop all ds
     usage: dsclear
     """
+    count = sum(len(store) for store in DS_TASKS.values())
     for store in DS_TASKS.values():
         for task in list(store.values()):
             if not task.done():
                 task.cancel()
         store.clear()
-    await eor(m, "`clear all ds*`")
+    await eor(m, f"`cleared all ds*: {count} tasks`")
 
 
 def get_ds_name(ds: int) -> str:
@@ -176,7 +179,7 @@ def get_ds_name(ds: int) -> str:
 
 
 def get_task_store(ds: int) -> dict[int, asyncio.Task]:
-    return DS_TASKS.get(ds)
+    return DS_TASKS[ds]
 
 
 async def run_ds(
@@ -192,21 +195,36 @@ async def run_ds(
     is_forward: bool,
 ) -> None:
     error_count = 0
+    disable_link_preview = False
     for _ in range(count):
         if chat_id not in get_task_store(ds):
             break
         try:
             if delay > DS_RANDOM_THRESHOLD:
                 await asyncio.sleep(random.uniform(*DS_RANDOM_DELAY))
-            result = await send_ds_message(
-                client,
-                message,
-                chat_id,
-                from_chat_id,
-                message_id,
-                is_text,
-                is_forward,
-            )
+            try:
+                result = await send_ds_message(
+                    client,
+                    message,
+                    chat_id,
+                    from_chat_id,
+                    message_id,
+                    is_text,
+                    is_forward,
+                    disable_link_preview,
+                )
+            except errors.ChatSendWebpageForbidden:
+                disable_link_preview = True
+                result = await send_ds_message(
+                    client,
+                    message,
+                    chat_id,
+                    from_chat_id,
+                    message_id,
+                    is_text,
+                    is_forward,
+                    disable_link_preview,
+                )
             if is_forward:
                 message_id = getattr(result, "id", message_id)
             error_count = 0
@@ -251,6 +269,7 @@ async def send_ds_message(
     message_id: int,
     is_text: bool,
     is_forward: bool,
+    disable_link_preview: bool = False,
 ) -> Message:
     if is_text:
         return await client.send_message(
@@ -258,7 +277,7 @@ async def send_ds_message(
             message,
             parse_mode=DEFAULT_PARSE_MODE,
             disable_notification=True,
-            link_preview_options=LINK_PREVIEW,
+            link_preview_options=(NO_LINK_PREVIEW if disable_link_preview else LINK_PREVIEW),
         )
     if is_forward:
         return await client.forward_messages(
@@ -274,7 +293,7 @@ async def send_ds_message(
             entities=message.entities,
             parse_mode=enums.ParseMode.DISABLED,
             disable_notification=True,
-            link_preview_options=message.link_preview_options,
+            link_preview_options=(NO_LINK_PREVIEW if disable_link_preview else message.link_preview_options),
         )
     return await client.copy_message(
         chat_id,
