@@ -257,20 +257,11 @@ async def run_ds(
             wait = err.value + random.uniform(15, 30)
             client.log.warning(f"Delayspam {get_ds_name(ds)} flood wait: {err.value}s, sleeping {wait:.1f}s")
             await asyncio.sleep(wait)
-        except errors.UserBannedInChannel as err:
-            client.log.warning(f"Delayspam {get_ds_name(ds)} stopped in chat {chat_id}: {err}")
-            delete_task(ds, chat_id)
-            break
         except (
             errors.ChannelInvalid,
             errors.ChannelPrivate,
             errors.ChatWriteForbidden,
-            errors.ChatSendPhotosForbidden,
-            errors.ChatSendVideosForbidden,
-            errors.ChatSendGifsForbidden,
-            errors.ChatSendVoicesForbidden,
-            errors.ChatSendAudiosForbidden,
-            errors.ChatSendMediaForbidden,
+            errors.UserBannedInChannel,
         ) as err:
             client.log.warning(f"Delayspam {get_ds_name(ds)} stopped in chat {chat_id}: {err}")
             delete_task(ds, chat_id)
