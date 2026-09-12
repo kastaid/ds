@@ -7,7 +7,7 @@ import random
 import subprocess
 import sys
 
-PACKAGE = "Kurigram==2.2.25"
+PACKAGE = "Kurigram==2.2.26"
 DELAY_RANGE = (1.5, 2.5)
 SHORT_DELAY = 1.5
 
