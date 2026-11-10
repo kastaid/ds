@@ -23,7 +23,7 @@ def _validate_tgcrypto() -> None:
         raise RuntimeError("Missing crypto library. Install one of: pytgcrypto, TgCryptoRust, or WarpCrypto.") from None
 
 
-_PINNED_VERSION = "2.2.26"
+_PINNED_VERSION = "2.2.27"
 
 
 def _validate_version() -> None:
