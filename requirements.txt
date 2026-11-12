@@ -1,6 +1,6 @@
 Kurigram==2.2.27
 TgCryptoRust==2.0.0
 
-loguru==0.7.3
+loguru==0.8.0
 python-dotenv==1.2.4
 uvloop==0.23.0
